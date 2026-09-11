@@ -1,6 +1,6 @@
 # Portpass
 
-A standalone, responsive static web app at `/portpass/`. No build step, API key, account or backend. From the repository root, run `python3 -m http.server 8000 --bind 127.0.0.1 --directory portpass`, then open http://localhost:8000/. When deployed with the portfolio, the app lives at `/portpass/`.
+A standalone, responsive static web app. No build step, API key, account or backend. From this directory, run `python3 -m http.server 8000 --bind 127.0.0.1`, then open http://localhost:8000/.
 
 ## Features
 
@@ -30,7 +30,43 @@ Not yet covered: most third-country document exemptions (e.g. a US visa allowing
 
 Review upstream timestamp and changes before replacing the passport JSON. Preserve its license. Update the displayed snapshot date in `index.html` and `app.js`. Add rule regression cases in `tests/rules.test.js` when extending `rules.js`. Keep missing information as `unknown`. Do not treat third-party scraped data as guaranteed current or complete.
 
-Tests: `node portpass/tests/rules.test.js` from the repository root.
+Tests: `node tests/rules.test.js` from this directory.
 
-Browser checks: install Playwright in your development environment, start the Portpass-only server above, then run `node portpass/tests/browser.cjs`. Set `PORTPASS_URL` to test another URL. Screenshots are written to `/tmp/portpass-desktop.png` and `/tmp/portpass-mobile.png`.
-# portpass
+Browser checks: install Playwright in your development environment, start the server above, then run `node tests/browser.cjs`. Set `PORTPASS_URL` to test another URL. Screenshots are written to `/tmp/portpass-desktop.png` and `/tmp/portpass-mobile.png`.
+# Portpass
+
+## Cloudflare deployment
+
+This is a no-build static site and can be deployed either as a Workers Static
+Assets application or as a Cloudflare Pages project.
+
+Install the local Cloudflare CLI and authenticate once:
+
+```sh
+npm install
+npx wrangler login
+```
+
+Run it locally through the Workers runtime:
+
+```sh
+npm run dev
+```
+
+Deploy as a Worker:
+
+```sh
+npm run deploy:worker
+```
+
+Deploy to Pages (the Pages project must exist, or Wrangler will prompt to
+create it):
+
+```sh
+npm run deploy:pages
+```
+
+For a Git-connected Pages project, use `.` as the build output directory and
+leave the build command empty. The `wrangler.pages.jsonc` file records the same
+configuration for CLI deployments. The Worker and Pages configs are separate
+because Cloudflare uses different configuration keys for those services.
