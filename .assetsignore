@@ -1,10 +1,13 @@
 # Only publish the static site; exclude dependencies and repository files.
 /*
 !/index.html
+!/impressum.html
 !/style.css
 !/app.js
+!/map-export.js
 !/rules.js
 !/icon.svg
 !/_headers
 !/data/
 !/vendor/
+!/assets/

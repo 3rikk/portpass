@@ -6,6 +6,9 @@ A standalone, responsive static web app. No build step, API key, account or back
 
 - Multiple passports, residence permits and visitor visas, linked to a passport, with optional expiry dates.
 - Interactive pan/zoom world map, searchable country list and Visit/Live modes.
+- Show all destinations matching the current search and filter, or load more in batches.
+- Automatic light and dark appearance matching the system, including the map and dialogs.
+- Share map previews a JPEG with your travel wallet, current Visit/Live counters, a grid-free world map, and Portpass branding. Download it or use native file sharing where supported. Images are generated locally in the browser.
 - Best available route plus all assessed alternatives, conditions and provenance.
 - Browser-local wallet. No scans or document numbers; no third-party runtime requests.
 - Empty first-run state. Add a passport to begin. Expired documents and documents without an active linked passport are excluded.
@@ -14,13 +17,21 @@ A standalone, responsive static web app. No build step, API key, account or back
 
 `data/passports.json`: [imorte/passport-index-data](https://github.com/imorte/passport-index-data), MIT, upstream last updated **2026-02-17**, retrieved 2026-09-12. 199 passport origins. The original [ilyankou dataset](https://github.com/ilyankou/passport-index-dataset) is archived. Upstream data is derived from Passport Index; it is a community dataset, not an official or live admission check. License notice is retained beside the data. No individual corridor freshness or official-source audit is implied.
 
-`rules.js`: a deliberately limited independent rules layer for EU-to-EU citizenship residence rights and Schengen short stays based on eligible residence permits or uniform type C visas. Sources reviewed 2026-09-12:
-- https://europa.eu/youreurope/citizens/travel/entry-exit/non-eu-nationals/index_en.htm
-- https://europa.eu/youreurope/citizens/residence/residence-rights/index_en.htm
+`rules.js`: independent rules reviewed **2026-09-12**, covering:
 
-Other visas/permits record declared possession for their own issuing destination, subject to the document's conditions. Work eligibility is not inferred. No-admission records are not overridden by a visa or permit linked to that passport. An alternative passport may have its own assessed route; individual restrictions still require verification. Unassessed residence routes are not denials. Generic `visa free` matrix values are never used to infer residence rights.
+- UK–Ireland Common Travel Area visits and residence for British and Irish citizens, in both directions.
+- EU/EEA free movement, the EU–Switzerland agreement, and EFTA mobility. Residence conditions and registration remain applicable. Liechtenstein requires quota approval and is shown as **Check eligibility**, not established residence rights.
+- EU/Schengen ordinary-passport short-stay waivers, including biometric, Taiwanese national-ID-number and Hong Kong/Macao SAR-passport conditions. The wallet asks for yes/no confirmation, never the ID number. Missing confirmation is **Check eligibility**; a negative answer does not qualify for the waiver. These rules apply to Schengen destinations, not Ireland or Cyprus. No reciprocal entry rights outside Schengen are inferred.
+- Vanuatu’s removed waiver and Nauru’s not-yet-applicable waiver; the EU–Brazil stay-calculation exception is identified rather than reduced to a generic day count.
+- Schengen short stays with an eligible residence permit or uniform type C visa. These documents alone do not grant residence in other countries.
 
-Not yet covered: most third-country document exemptions (e.g. a US visa allowing entry elsewhere), UK/Ireland and other bilateral residence arrangements, EEA/Swiss residence agreements, long-stay visas, travel history, remaining entries, restrictions, dates of travel, territorial visa limitations and passport validity thresholds. A comprehensive free, officially maintained database covering these combinations was not identified. Expand the engine with individually sourced, dated rules rather than broad assumptions. [IATA Timatic](https://www.iata.org/timatic) is a production integration candidate; obtain access and licensing terms from IATA.
+Source links, decision boundaries, and maintenance notes: [agreement coverage](docs/agreement-coverage.md). Country details link to the applicable authority and review date.
+
+The passport option means an ordinary citizen passport (GB means British citizen). Diplomatic passports, other British nationality classes and special travel documents are not assessed. Legacy wallet entries with missing passport-condition fields remain unconfirmed. All confirmation fields are stored locally with the wallet.
+
+Other visas/permits record declared possession for their issuing destination, subject to their conditions. A UK or Irish residence permit does not grant CTA citizenship rights; an EU or Swiss permit does not confer citizenship-based free movement. General work eligibility is not assessed beyond the stated treaty conditions. No-admission records are not overridden by a visa or permit linked to that passport, or by a short-stay visa waiver. An alternative passport may have its own route. Unassessed residence routes are not denials; visa-free tourism never implies residence rights.
+
+Not yet covered: most third-country document exemptions, family-member rights, UK Withdrawal Agreement status, EU long-term resident and Blue Card mobility, Turkish association rights, other bilateral residence schemes, long-stay visas, travel history, remaining entries, individual restrictions and travel-date authorisation requirements. These require additional eligibility inputs or destination-specific assessment. Visa-facilitation agreements simplify applications; they do not create visa-free travel or automatic residence. This is a dated rules snapshot, not an exhaustive or live treaty database. [IATA Timatic](https://www.iata.org/timatic) is a production integration candidate; obtain access and licensing terms from IATA.
 
 `data/world.geojson`: Natural Earth 1:110m administrative boundaries, [public domain](https://www.naturalearthdata.com/about/terms-of-use/), obtained from https://github.com/nvkelso/natural-earth-vector. Small countries may not have polygons; all dataset countries remain in the list. Boundary presentation does not imply a political position.
 
@@ -32,7 +43,7 @@ Review upstream timestamp and changes before replacing the passport JSON. Preser
 
 Tests: `node tests/rules.test.js` from this directory.
 
-Browser checks: install Playwright in your development environment, start the server above, then run `node tests/browser.cjs`. Set `PORTPASS_URL` to test another URL. Screenshots are written to `/tmp/portpass-desktop.png` and `/tmp/portpass-mobile.png`.
+Browser checks: install Playwright in your development environment, start the server above, then run `node tests/browser.cjs`. Run `node tests/map-export.cjs` for JPEG download and sharing checks. Set `PORTPASS_URL` to test another URL. Screenshots are written to `/tmp/portpass-desktop.png` and `/tmp/portpass-mobile.png`.
 # Portpass
 
 ## Cloudflare deployment
