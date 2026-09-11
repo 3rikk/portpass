@@ -1,0 +1,33 @@
+const assert = require('node:assert/strict');
+require('../rules.js');
+const matrix = require('../data/passports.json');
+const R=globalThis.PortpassRules;
+const p=country=>({type:'passport',country});
+const permit=(country,passport)=>({type:'residence',country,passport});
+const run=(destination,docs,mode='visit',data=matrix)=>R.evaluate(destination,docs,mode,data,'2026-09-12');
+assert.equal(Object.keys(matrix).length,199);
+assert.equal(run('FR',[]).category,'unknown');
+assert.equal(run('DE',[p('DE')],'live').category,'home');
+assert.equal(run('FR',[p('DE')],'live').category,'live');
+assert.equal(run('FR',[p('US')],'live').category,'unknown');
+assert.equal(run('FR',[p('IN'),permit('DE','IN')]).category,'document');
+assert.equal(run('FR',[p('IN'),permit('DE','IN')],'live').category,'unknown');
+assert.equal(run('DE',[p('IN'),permit('DE','IN')],'live').category,'permit');
+assert.equal(run('IE',[p('IN'),permit('DE','IN')]).category,run('IE',[p('IN')]).category);
+assert.equal(run('FR',[p('IN'),{type:'schengen',country:'DE',passport:'IN'}]).category,'document');
+assert.equal(run('FR',[p('IN'),{type:'schengen',country:'DE',passport:'IN'}],'live').category,'unknown');
+assert.equal(run('FR',[{...p('DE'),expiry:'2026-09-11'}]).category,'unknown');
+assert.equal(run('FR',[{...p('DE'),expiry:'2026-09-12'}]).category,'free');
+assert.equal(run('FR',[permit('DE','IN')]).category,'unknown');
+assert.equal(run('FR',[p('IN'),{...permit('DE','IN'),expiry:'2026-01-01'}]).category,run('FR',[p('IN')]).category);
+const fixture={IN:{US:{status:'no admission'},JP:{status:'visa required'}},DE:{JP:{status:'visa free',days:90}}};
+assert.equal(run('US',[p('IN'),{type:'visa',country:'US',passport:'IN'}],'visit',fixture).category,'restricted');
+assert.equal(run('JP',[p('IN'),p('DE')],'visit',fixture).category,'free');
+assert.equal(run('JP',[p('IN'),p('DE')],'visit',fixture).best.document.country,'DE');
+assert.equal(run('JP',[p('IN'),{type:'visa',country:'JP',passport:'IN'}],'visit',fixture).category,'document');
+assert.equal(run('JP',[p('IN'),{type:'visa',country:'JP',passport:'US'}],'visit',fixture).category,'required');
+for(const [origin,row] of Object.entries(matrix))for(const [dest,rule]of Object.entries(row)){
+ assert.match(origin,/^[A-Z]{2}$/);assert.match(dest,/^[A-Z]{2}$/);
+ assert.ok(['visa free','visa on arrival','eta','e-visa','visa required','no admission','-1'].includes(String(rule.status)),`Unexpected status ${rule.status}`);
+}
+console.log('Passed: 20 rule/data assertions plus all passport matrix status checks.');

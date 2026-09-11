@@ -1,0 +1,31 @@
+const {chromium}=require('playwright');
+const assert=require('node:assert/strict');
+(async()=>{
+ const browser=await chromium.launch({headless:true});
+ const page=await browser.newPage({viewport:{width:1440,height:1100}});const errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(process.env.PORTPASS_URL||'http://127.0.0.1:8000/');
+ await page.waitForSelector('.country');
+ assert.equal(await page.locator('.document').count(),0);
+ async function add(type,country){await page.click('#add-document');await page.selectOption('#document-type',type);await page.selectOption('#document-country',country);await page.click('button[type=submit]');}
+ await add('passport','IN');await add('residence','DE');
+ await page.fill('#search','France');await page.click('[data-country=FR]');
+ assert.match(await page.locator('#country-detail').innerText(),/Schengen short-stay access/);
+ await page.keyboard.press('Escape');await page.click('[data-mode=live]');await page.click('[data-country=FR]');
+ assert.match(await page.locator('#country-detail').innerText(),/No residence rule assessed/);
+ await page.keyboard.press('Escape');await add('passport','DE');await page.click('[data-country=FR]');
+ assert.match(await page.locator('#country-detail').innerText(),/EU freedom of movement/);
+ await page.keyboard.press('Escape');await page.reload();await page.waitForSelector('.country');assert.equal(await page.locator('.document').count(),3);
+ await page.click('#zoom-in');assert.match(await page.locator('#world-map > g').getAttribute('transform'),/scale\(1.5\)/);
+ await page.click('#reset-map');await page.fill('#search','');await page.screenshot({path:'/tmp/portpass-desktop.png',fullPage:true});
+ await page.click('#sources-button');assert.equal(await page.locator('#sources-dialog').evaluate(d=>d.open),true);await page.keyboard.press('Escape');
+ await page.fill('#search','no-such-country');assert.match(await page.locator('#destination-list').innerText(),/No destinations/);
+ await page.fill('#search','');await page.click('#show-more');assert.equal(await page.locator('.destination-card').count(),36);
+ await page.setViewportSize({width:390,height:844});
+ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth));
+ await page.screenshot({path:'/tmp/portpass-mobile.png',fullPage:true});
+ await page.click('#add-document');await page.selectOption('#document-type','visa');await page.selectOption('#document-country','US');await page.fill('#document-expiry','2020-01-01');await page.click('button[type=submit]');
+ assert.match(await page.locator('#documents').innerText(),/Expired/);
+ await page.locator('.remove').last().click();assert.equal(await page.locator('.document').count(),3);
+ assert.deepEqual(errors,[]);await browser.close();console.log('Browser checks passed: document add/remove, residency boundaries, persistence, dialogs, search, pagination, zoom, mobile overflow, expiry, no JS errors.');
+})().catch(e=>{console.error(e);process.exit(1)});
