@@ -1,0 +1,10 @@
+# Only publish the static site; exclude dependencies and repository files.
+/*
+!/index.html
+!/style.css
+!/app.js
+!/rules.js
+!/icon.svg
+!/_headers
+!/data/
+!/vendor/

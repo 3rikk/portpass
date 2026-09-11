@@ -59,6 +59,13 @@ Deploy as a Worker:
 npm run deploy:worker
 ```
 
+For Git-connected Workers Builds, leave the build command empty and use
+`npm run deploy:worker` as the deploy command. The root `.assetsignore` allows
+only the site's files, `data/`, and `vendor/` to be uploaded. Add new public
+files there when needed. Wrangler does not support `assets.exclude` in
+`wrangler.jsonc`; without `.assetsignore`, using the repository root as the
+asset directory also uploads dependencies such as `node_modules/workerd`.
+
 Deploy to Pages (the Pages project must exist, or Wrangler will prompt to
 create it):
 
