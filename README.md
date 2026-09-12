@@ -100,3 +100,5 @@ Run `npm test` for rule and visa-calendar checks. `tests/visa-browser.js` provid
 Citizenship without a passport is a separate wallet type. It adds a residence result for that country in the Live tab only. It never substitutes for a passport, links a visa/permit, or adds passport travel or treaty routes abroad.
 
 **Advanced** below the map downloads a readable, indented JSON file with a `.portpass` extension. The optional name determines the filename (default `profile.portpass`). Version 1 contains `format: "portpass"`, `version: 1`, `name`, and `documents`, including visa timing and history. Import reads the file locally, validates it, and previews the entry count before the user replaces the current wallet. Invalid files leave the wallet untouched. Save the current profile first to keep it. Profiles are plain text, not encrypted; files are never uploaded to Portpass.
+
+The top-right theme selector offers System (default), Light and Dark. The override is stored locally as `portpass-theme`, applies to the main page and Impressum, and controls the palette used for new map images. It is a device preference, separate from exported wallet profiles.

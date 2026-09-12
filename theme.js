@@ -7,7 +7,8 @@
   function apply() {
     const theme=preference==='system'?(system.matches?'dark':'light'):preference;
     document.documentElement.dataset.theme=theme;
-    document.documentElement.style.colorScheme=theme;
+    // Refresh inherited palette values after parsing and when the choice changes.
+    if(document.readyState!=='loading')document.documentElement.style.setProperty('--theme-mode',preference+' '+theme);
     document.querySelectorAll('meta[name="theme-color"]').forEach(meta=>{
       meta.removeAttribute('media');meta.content=theme==='dark'?'#171e2b':'#f7f8f5';
     });
