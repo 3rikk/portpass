@@ -1,6 +1,6 @@
 # Portpass
 
-A standalone, responsive static web app. No build step, API key, account or backend. From this directory, run `python3 -m http.server 8000 --bind 127.0.0.1`, then open http://localhost:8000/.
+https://portpass.erik-kunz.com
 
 <img width="1505" height="856" alt="image" src="https://github.com/user-attachments/assets/023d88b6-12f8-40a4-843a-04a8a8615386" />
 
