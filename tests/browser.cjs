@@ -22,7 +22,7 @@ const assert=require('node:assert/strict');
  await page.fill('#search','no-such-country');assert.match(await page.locator('#destination-list').innerText(),/No destinations/);
  await page.fill('#search','');await page.click('#show-more');assert.equal(await page.locator('.destination-card').count(),36);
  await page.click('#show-all');
- const total=await page.evaluate(()=>Object.keys(matrix).length);
+ const total=await page.evaluate(()=>countries.length);
  assert.equal(await page.locator('.destination-card').count(),total);
  assert.equal(await page.locator('#show-more').isVisible(),false);
  assert.equal(await page.locator('#show-all').isVisible(),false);

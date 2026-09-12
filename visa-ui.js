@@ -103,10 +103,14 @@ function openDocumentForm(id=null) {
   if(d){$('#document-type').value=d.type;$('#document-country').value=d.country;}
   updateDocumentForm();
   if(d) {
-    $('#document-country').value=d.country;updatePassportDetails();
+    $('#document-country').value=d.country;updatePassportDetails();updateDocumentConditions();updateAssociationFields();
+    if(d.associationRoute)$('#association-route').value=d.associationRoute;
+    $('#association-confirmed').value=d.associationConfirmed===true?'yes':d.associationConfirmed===false?'no':'';
+    updateAssociationConditions();
     $('#linked-passport').value=d.passport||'';
     if(d.passport&&!$('#linked-passport').value){const option=new Option(`${name(d.passport)} passport (not active)`,d.passport);$('#linked-passport').add(option);$('#linked-passport').value=d.passport;}
     $('#document-expiry').value=d.expiry||'';
+    for(const key of ['permanent','multipleEntry','previouslyUsed'])$('#document-'+key).value=d[key]===true?'yes':d[key]===false?'no':'';
     const requirement=R.passportRequirement(d.country);
     if(requirement)$('#passport-condition').value=d[requirement.key]===true?'yes':d[requirement.key]===false?'no':'';
     if(VT.isVisa(d)) {

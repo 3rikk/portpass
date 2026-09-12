@@ -22,6 +22,14 @@
         if(d[key]!==undefined){if(typeof d[key]!=='string'||(d[key] && root.PortpassVisaTime.day(d[key])===null))fail('invalid calendar date.');out[key]=d[key];}
       }
       if(d.type==='passport')for(const key of ['biometric','nationalId','sarPassport'])if(d[key]!==undefined){if(typeof d[key]!=='boolean')fail('invalid passport condition.');out[key]=d[key];}
+      if(['passport','citizenship'].includes(d.type) && root.PortpassRules.EXTRA_DESTINATIONS.includes(d.country) && !root.PortpassRules.BOTC_TERRITORIES.includes(d.country))fail('choose the sovereign passport or citizenship country.');
+      if(['passport','citizenship'].includes(d.type) && root.PortpassRules.BOTC_TERRITORIES.includes(d.country) && d.localStatus!==undefined){if(typeof d.localStatus!=='boolean')fail('invalid local residence confirmation.');out.localStatus=d.localStatus;}
+      for(const key of d.type==='residence'?['permanent','previouslyUsed']:root.PortpassVisaTime.isVisa(d)?['multipleEntry','previouslyUsed']:[]) {
+        if(d[key]!==undefined){if(typeof d[key]!=='boolean')fail('invalid document condition.');out[key]=d[key];}
+      }
+      const associationError=root.PortpassRules.validateAssociation(d);if(associationError)fail(associationError);
+      if(d.associationRoute!==undefined)out.associationRoute=d.associationRoute;
+      if(d.associationConfirmed!==undefined)out.associationConfirmed=d.associationConfirmed;
       if(root.PortpassVisaTime.isVisa(d)) {
         if(d.type==='schengen' && !root.PortpassRules.SCHENGEN.includes(d.country))fail('issuer is not a Schengen country.');
         for(const key of ['entryDate','admittedUntil','stayUnit','stayBasis'])if(d[key]!==undefined){if(typeof d[key]!=='string')fail('invalid visa timing.');out[key]=d[key];}
