@@ -33,7 +33,7 @@ const fs = require('node:fs/promises');
     assert.ok(image.width >= 1800 && image.height >= 1100);
     const drawing = await page.evaluate(()=>window.exportDrawing);
     const mapBox = drawing.boxes.reduce((largest,box)=>box.width>largest.width?box:largest);
-    for (const label of ['MAP KEY','✳ portpass','portpass.erik-kunz.com']) {
+    for (const label of ['MAP KEY','portpass','portpass.erik-kunz.com']) {
       const text = drawing.texts.find(item=>item.value===label);
       assert.ok(text && text.x>mapBox.x && text.x<mapBox.x+mapBox.width && text.y>mapBox.y && text.y<mapBox.y+mapBox.height,label);
     }

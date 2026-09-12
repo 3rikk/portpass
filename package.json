@@ -5,7 +5,7 @@
     "dev": "wrangler dev --config wrangler.jsonc",
     "deploy:worker": "wrangler deploy --config wrangler.jsonc",
     "deploy:pages": "wrangler pages deploy . --project-name=portpass --config wrangler.pages.jsonc",
-    "test": "node tests/rules.test.js"
+    "test": "node tests/rules.test.js && node tests/visa-time.test.js && node tests/profile.test.js"
   },
   "devDependencies": {
     "wrangler": "latest"

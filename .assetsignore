@@ -6,8 +6,13 @@
 !/app.js
 !/map-export.js
 !/rules.js
+!/visa-time.js
+!/visa-ui.js
 !/icon.svg
 !/_headers
 !/data/
 !/vendor/
 !/assets/
+
+!/profile.js
+!/profile-ui.js

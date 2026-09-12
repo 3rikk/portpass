@@ -5,9 +5,9 @@ const names = new Intl.DisplayNames(['en'], {type:'region'});
 const name = code => { try {return names.of(code);} catch {return code;} };
 const flag = code => /^[A-Z]{2}$/.test(code) ? String.fromCodePoint(...[...code].map(c => c.charCodeAt(0)+127397)) : '◌';
 const escapeHTML = str => String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const typeNames = {passport:'Passport', residence:'Residence permit', visa:'Visitor visa', schengen:'Schengen visa · Type C'};
+const typeNames = {citizenship:'Citizenship · no passport', passport:'Passport', residence:'Residence permit', visa:'Visitor visa', schengen:'Schengen visa · Type C'};
 let docs = [], mode = 'visit', filter = 'all', query = '', limit = 12, matrix, countries, results, geo, mapPaths, zoom, svg;
-try { const saved=JSON.parse(localStorage.getItem('portpass-wallet-v1') || '[]'); if(Array.isArray(saved)) docs=saved.filter(d => d && typeof d.id==='string' && typeNames[d.type] && /^[A-Z]{2}$/.test(d.country) && (!d.expiry || /^\d{4}-\d{2}-\d{2}$/.test(d.expiry)) && (d.type==='passport' || /^[A-Z]{2}$/.test(d.passport))); } catch {}
+try { const saved=JSON.parse(localStorage.getItem('portpass-wallet-v1') || '[]'); if(Array.isArray(saved)) docs=saved.filter(d => d && typeof d.id==='string' && typeNames[d.type] && /^[A-Z]{2}$/.test(d.country) && (!d.expiry || /^\d{4}-\d{2}-\d{2}$/.test(d.expiry)) && (['passport','citizenship'].includes(d.type) || /^[A-Z]{2}$/.test(d.passport))); } catch {}
 const passportDetail = d => {
   const requirement=d.type==='passport' ? R.passportRequirement(d.country) : null;
   return requirement ? (d[requirement.key]===true ? 'Visa-waiver passport condition confirmed' : d[requirement.key]===false ? 'Visa-waiver passport condition not met' : 'Visa-waiver passport condition unconfirmed') : '';
@@ -19,23 +19,31 @@ const badge = category => `<span class="badge" style="--badge-color:${categoryCo
 function renderWallet() {
   const active=R.activeDocuments(docs);
   $('#document-count').textContent=docs.length;
-  $('#documents').innerHTML=docs.map(d=>`<div class="document ${d.type}"><span class="doc-symbol">${flag(d.country)}</span><div><strong>${escapeHTML(name(d.country))}</strong><small>${typeNames[d.type]}</small>${passportDetail(d)?`<small>${passportDetail(d)}</small>`:''}${!active.includes(d)?'<small class="document-warning">Expired or no active passport</small>':''}</div><button class="remove" data-remove="${escapeHTML(d.id)}" aria-label="Remove ${escapeHTML(documentName(d))}">×</button></div>`).join('');
+  $('#documents').innerHTML=docs.map(d=>`<div class="document ${d.type}"><span class="doc-symbol">${flag(d.country)}</span><div><strong>${escapeHTML(name(d.country))}</strong><small>${typeNames[d.type]}</small>${passportDetail(d)?`<small>${passportDetail(d)}</small>`:''}${!active.includes(d)?'<small class="document-warning">Expired, not yet valid, or no active passport</small>':''}${VT.isVisa(d)?visaTimingMarkup(d,true):''}</div><button class="edit-document" data-edit="${escapeHTML(d.id)}" aria-label="Edit ${escapeHTML(documentName(d))}">Edit</button><button class="remove" data-remove="${escapeHTML(d.id)}" aria-label="Remove ${escapeHTML(documentName(d))}">×</button></div>`).join('');
 }
 function groups() {return mode==='visit' ? [{key:'easy',label:'Visa-free / document held',cats:['free','home','document','permit']},{key:'apply',label:'Application / eligibility check',cats:['arrival','online','conditional']},{key:'required',label:'Visa required / restricted',cats:['required','restricted']}] : [{key:'rights',label:'Citizenship / treaty rights',cats:['home','live']},{key:'permits',label:'Residence permit held',cats:['permit']},{key:'unknown',label:'Approval / not assessed',cats:['conditional','unknown']}];}
 function render() {
   if (!matrix) return;
   results=Object.fromEntries(countries.map(code=>[code,R.evaluate(code,docs,mode,matrix)]));
   renderWallet();
+  const living = mode === 'live';
+  $('.wallet-bottom .tiny-label').textContent = living ? 'TRAVEL OPTIONS' : 'RESIDENCE OPTIONS';
+  $('.wallet-bottom h3').innerHTML = living ? 'Visiting abroad' : 'Living abroad';
+  $('.wallet-bottom p').textContent = living
+    ? 'Discover places to visit with the documents you already hold.'
+    : 'Discover residence options with the documents you already hold.';
+  $('#explore-other-mode').innerHTML = `${living ? 'Explore travel possibilities' : 'Explore living abroad'} <span aria-hidden="true">↗</span>`;
   const gs=groups();
   $('#stats').innerHTML=gs.map((g,i)=>`<div class="stat"><div class="stat-top">${g.label}<span class="stat-icon">${['↗','◷','⌁'][i]}</span></div><strong>${countries.filter(c=>g.cats.includes(results[c].category)).length}</strong><small>destinations</small></div>`).join('');
   $('#map-title').textContent=mode==='visit'?'Your travel possibilities':'Your residence possibilities';
   $('#map-subtitle').textContent=docs.length?'Select a country to explore':'Add a passport to reveal your possibilities';
-  $('#results-heading').textContent=mode==='visit'?'Find your next somewhere.':'Find a place to put down roots.';
+  $('#results-heading').textContent=mode==='visit'?'Explore destinations.':'Explore residence options.';
   const cats=mode==='visit'?['home','free','document','permit','arrival','online','required','restricted','conditional','unknown'].filter(c=>['free','document','arrival','online','required','unknown'].includes(c)||Object.values(results).some(r=>r.category===c)):[ 'home','live','permit','conditional','unknown'];
   $('#legend').innerHTML=cats.map(c=>`<span><i class="dot" style="background:${categoryColor(c)}"></i>${C[c].label}</span>`).join('');
   $('#filters').innerHTML=[{key:'all',label:'All destinations'},...gs].map(g=>`<button data-filter="${g.key}" class="${filter===g.key?'active':''}" aria-pressed="${filter===g.key}">${g.label}</button>`).join('');
   mapPaths?.attr('fill',f=>categoryColor(results[f.properties.code]?.category || 'unknown'));
   renderDestinations();
+  renderVisaClocks();
 }
 function renderDestinations() {
   const grouping=groups().find(g=>g.key===filter);
@@ -53,6 +61,7 @@ function renderDestinations() {
 function showCountry(code, fallback) {
   const result=results[code] || {category:'unknown',routes:[]};
   $('#country-detail').innerHTML=`<div class="dialog-heading"><div><span class="detail-flag">${flag(code)}</span><h2>${escapeHTML(fallback || name(code))}</h2></div><button class="close" data-close="country-dialog" aria-label="Close">×</button></div>${badge(result.category)}<p>${mode==='visit'?'Your routes for a short visit.':'Your assessed residence routes.'} ${result.routes.length>1?'The strongest route is shown first.':''}</p>${result.routes.map(route=>`<article class="route"><h3>${escapeHTML(route.title)}${route.days?` · up to ${route.days} days`:''}</h3><p><strong>Using ${escapeHTML(documentName(route.document))}</strong></p><p>${escapeHTML(route.conditions)}</p>${route.source?`<a href="${route.source}" target="_blank" rel="noopener">${escapeHTML(R.sourceLabels[route.source] || 'Official guidance')}${route.reviewed ? ` · reviewed ${route.reviewed}` : ''} ↗</a>`:'<p>Based on your declared document; check its issuing authority.</p>'}</article>`).join('') || `<div class="route"><h3>${mode==='live'?'No residence rule assessed':'No entry route assessed'}</h3><p>${docs.length?'This destination or document combination is not covered. This does not mean you are ineligible.':'Add a valid passport to start exploring.'}</p></div>`}<p class="detail-note">Rules describe general routes, not a guarantee of admission. Confirm current entry rules, document validity and allowed activities with the destination’s authorities.</p>`;
+  $('#country-detail').insertAdjacentHTML('beforeend',visaDetailsMarkup(code));
   $('#country-dialog').showModal();
 }
 function drawMap() {
@@ -63,7 +72,9 @@ function drawMap() {
   mapPaths=g.selectAll('.country').data(geo.features.filter(f=>f.properties.code!=='AQ')).join('path').attr('class','country').attr('d',path).attr('fill',categoryColor('unknown')).attr('role','button').attr('tabindex',0).attr('aria-label',f=>`Explore ${f.properties.label}`)
     .on('click',(_,f)=>showCountry(f.properties.code,f.properties.label))
     .on('keydown',(e,f)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showCountry(f.properties.code,f.properties.label);}})
-    .on('mousemove',(e,f)=>{const box=$('#map-container').getBoundingClientRect(), tip=$('#tooltip');tip.textContent=`${f.properties.label} · ${C[results[f.properties.code]?.category||'unknown'].label}`;tip.style.display='block';tip.style.left=`${Math.max(8,Math.min(e.clientX-box.left+12,box.width-205))}px`;tip.style.top=`${Math.max(8,e.clientY-box.top-42)}px`;})
+    .on('mousemove',showMapTooltip)
+    .on('focus',showMapTooltip)
+    .on('blur',()=>{$('#tooltip').style.display='none';})
     .on('mouseleave',()=>{$('#tooltip').style.display='none';});
   zoom=d3.zoom().scaleExtent([1,7]).translateExtent([[0,0],[1000,520]]).on('zoom',e=>{g.attr('transform',e.transform);$('#tooltip').style.display='none';});svg.call(zoom).on('dblclick.zoom',null);
   $('#zoom-in').onclick=()=>svg.call(zoom.scaleBy,1.5);$('#zoom-out').onclick=()=>svg.call(zoom.scaleBy,1/1.5);$('#reset-map').onclick=()=>svg.call(zoom.transform,d3.zoomIdentity);
@@ -82,10 +93,17 @@ function updateDocumentForm() {
   const options=type==='schengen'?countries.filter(c=>R.SCHENGEN.includes(c)):countries;
   $('#document-country').innerHTML=options.map(c=>`<option value="${c}">${escapeHTML(name(c))}</option>`).join('');
   if(options.includes(selection))$('#document-country').value=selection;
-  $('#linked-label').hidden=type==='passport';
+  const standalone=['passport','citizenship'].includes(type);
+  $('#linked-label').hidden=standalone;
+  $('#linked-passport').disabled=standalone;
+  $('#document-expiry').closest('label').hidden=type==='citizenship';
+  $('#document-expiry').disabled=type==='citizenship';
+  $('#citizenship-note').hidden=type!=='citizenship';
+  $('#country-label-text').textContent=type==='citizenship'?'Country of citizenship':'Issuing country';
   $('#linked-passport').innerHTML=docs.filter(d=>d.type==='passport'&&(!d.expiry||d.expiry>=R.today())).map(d=>`<option value="${d.country}">${escapeHTML(name(d.country))} passport</option>`).join('');
-  $('#linked-passport').required=type!=='passport';
+  $('#linked-passport').required=!standalone;
   updatePassportDetails();
+  updateVisaFields();
 }
 function setMode(value) {mode=value;filter='all';limit=12;document.querySelectorAll('[data-mode]').forEach(b=>{b.classList.toggle('active',b.dataset.mode===mode);b.setAttribute('aria-pressed',String(b.dataset.mode===mode));});render();}
 document.addEventListener('click',e=>{
@@ -93,24 +111,43 @@ document.addEventListener('click',e=>{
   const remove=e.target.closest('[data-remove]');if(remove){docs=docs.filter(d=>d.id!==remove.dataset.remove);save();render();}
   const country=e.target.closest('[data-country]');if(country)showCountry(country.dataset.country);
   const f=e.target.closest('[data-filter]');if(f){filter=f.dataset.filter;limit=12;render();}
+  const edit=e.target.closest('[data-edit]');if(edit)openDocumentForm(edit.dataset.edit);
+  const focus=e.target.closest('[data-visa-focus]');if(focus){focusedVisaId=focusedVisaId===focus.dataset.visaFocus?null:focus.dataset.visaFocus;renderVisaClocks();}
   const m=e.target.closest('[data-mode]');if(m)setMode(m.dataset.mode);
 });
 for(const dialog of document.querySelectorAll('dialog')) dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
-$('#add-document').onclick=()=>{if(!matrix)return;$('#document-form').reset();$('#form-error').textContent='';updateDocumentForm();$('#document-dialog').showModal();};
-$('#document-type').onchange=updateDocumentForm;
-$('#document-country').onchange=updatePassportDetails;
+$('#add-document').onclick=()=>openDocumentForm();
+$('#document-type').onchange=()=>{updateDocumentForm();};
+$('#document-country').onchange=()=>{updatePassportDetails();updateVisaAssumption();};
+$('#linked-passport').onchange=updateVisaAssumption;
+$('#visa-stay-duration').oninput=()=>{
+  if($('#document-type').value==='schengen' && !$('#visa-stay-basis').dataset.chosen) {
+    $('#visa-stay-basis').value=Number($('#visa-stay-duration').value)>0 && Number($('#visa-stay-duration').value)<90?'total':'rolling';
+  }
+  updateVisaAssumption();
+};
+$('#visa-stay-unit').onchange=updateVisaAssumption;
+$('#visa-stay-basis').onchange=()=>{$('#visa-stay-basis').dataset.chosen='true';};
+$('#add-visa-visit').onclick=()=>addVisaVisitRow();
 $('#document-form').onsubmit=e=>{
   e.preventDefault();const type=$('#document-type').value,country=$('#document-country').value,expiry=$('#document-expiry').value,passport=$('#linked-passport').value;
-  if(type!=='passport'&&!passport){$('#form-error').textContent='Add a valid passport first so we can link this document to it.';return;}
-  if(docs.some(d=>d.type===type&&d.country===country&&(type==='passport'||d.passport===passport))){$('#form-error').textContent='This document is already in your wallet. Remove it first to update it.';return;}
+  if(!['passport','citizenship'].includes(type)&&!passport){$('#form-error').textContent='Add a valid passport first so we can link this document to it.';return;}
+  if(!VT.isVisa({type}) && docs.some(d=>d.id!==editingDocumentId&&d.type===type&&d.country===country&&(['passport','citizenship'].includes(type)||d.passport===passport))){$('#form-error').textContent='This document is already in your wallet. Use its Edit button to update it.';return;}
   const requirement=type==='passport'?R.passportRequirement(country):null;
   const confirmation=$('#passport-condition').value;
-  docs.push({id:crypto.randomUUID(),type,country,expiry,...(type==='passport'?{}:{passport}),...(requirement && confirmation!=='' ? {[requirement.key]:confirmation==='yes'} : {})});save();render();$('#document-dialog').close();
+  const document={id:editingDocumentId||crypto.randomUUID(),type,country,...(type==='citizenship'?{}:{expiry}),...(['passport','citizenship'].includes(type)?{}:{passport}),...(requirement && confirmation!=='' ? {[requirement.key]:confirmation==='yes'} : {})};
+  if(VT.isVisa(document)) {
+    Object.assign(document,draftVisa());
+    const error=VT.validate(document);if(error){$('#form-error').textContent=error;return;}
+  }
+  if(editingDocumentId)docs=docs.map(d=>d.id===editingDocumentId?document:d);else docs.push(document);
+  save();render();$('#document-dialog').close();editingDocumentId=null;
+
 };
 $('#search').oninput=e=>{query=e.target.value.trim().toLowerCase();limit=12;if(matrix)renderDestinations();};
 $('#show-more').onclick=()=>{limit+=24;renderDestinations();};
 $('#show-all').onclick=()=>{limit=Infinity;renderDestinations();};
-$('#explore-live').onclick=()=>setMode('live');
+$('#explore-other-mode').onclick=()=>setMode(mode === 'live' ? 'visit' : 'live');
 $('#sources-button').onclick=$('#coverage-button').onclick=()=>$('#sources-dialog').showModal();
 let exportFile, exportUrl, exportGeneration = 0;
 function clearMapExport() {
@@ -137,7 +174,7 @@ $('#share-map').onclick = async () => {
       features: geo.features, results, mode, categories,
       wallet: docs.map(d => ({
         title: `${flag(d.country)} ${name(d.country)}`,
-        detail: typeNames[d.type] + (d.passport ? ` · ${name(d.passport)} passport` : '') + (passportDetail(d) ? ` · ${passportDetail(d)}` : ''),
+        detail: typeNames[d.type] + (d.passport ? ` · ${name(d.passport)} passport` : '') + (passportDetail(d) ? ` · ${passportDetail(d)}` : '') + (VT.isVisa(d) ? ` · ${visaHeadline(VT.summary(d,docs,matrix))} · ${visaExpiryText(VT.summary(d,docs,matrix))}` : ''),
         inactive: !active.includes(d)
       })),
       counters: groups().map(g => ({label: g.label, count: countries.filter(c => g.cats.includes(results[c].category)).length}))
@@ -184,4 +221,8 @@ async function init(){
     drawMap();render();$('#share-map').disabled=false;
   }catch(error){$('#stats').innerHTML='<p class="empty">We couldn’t load the map data. Serve this folder over HTTP and refresh to try again.</p>';$('#map-subtitle').textContent='Data unavailable';console.error(error);}
 }
+let lastVisaDate=R.today();
+function refreshVisaDay(){const date=R.today();if(date!==lastVisaDate){lastVisaDate=date;render();$('#tooltip').style.display='none';}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshVisaDay();});
+setInterval(refreshVisaDay,60000);
 init();

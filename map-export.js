@@ -109,7 +109,19 @@ window.PortpassMapExport = {
       text(PortpassRules.categories[key].label, x + 30, rowY, 22, palette.ink);
     });
     ctx.textAlign = 'right';
-    text('✳ portpass', right + mapWidth - 24, height - 124, 45, palette.ink, 700);
+    const brandRight = right + mapWidth - 24, brandY = height - 124;
+    ctx.font = `700 45px ${font}`;
+    const markX = brandRight - ctx.measureText('portpass').width - 32;
+    const markY = brandY + 26;
+    ctx.save(); ctx.strokeStyle = palette.ink; ctx.lineWidth = 3.5;
+    ctx.beginPath();
+    for (let spoke = 0; spoke < 4; spoke++) {
+      const angle = spoke * Math.PI / 4;
+      const dx = Math.cos(angle) * 18, dy = Math.sin(angle) * 18;
+      ctx.moveTo(markX - dx, markY - dy); ctx.lineTo(markX + dx, markY + dy);
+    }
+    ctx.stroke(); ctx.restore();
+    text('portpass', brandRight, brandY, 45, palette.ink, 700);
     text('portpass.erik-kunz.com', right + mapWidth - 24, height - 66, 25, palette.muted);
     const blob = await new Promise((resolve, reject) => canvas.toBlob(result => result ? resolve(result) : reject(new Error('Could not create the JPEG.')), 'image/jpeg', .94));
     return new File([blob], `portpass-${mode}-map.jpg`, {type: 'image/jpeg'});

@@ -88,3 +88,15 @@ For a Git-connected Pages project, use `.` as the build output directory and
 leave the build command empty. The `wrangler.pages.jsonc` file records the same
 configuration for CLI deployments. The Worker and Pages configs are separate
 because Cloudflare uses different configuration keys for those services.
+
+Visa clocks keep allowance, validity, arrival, admission deadline and previous visits in the existing local browser wallet. Edit any document to update its dates. Select a clock to highlight its destination or Schengen bloc; hover or open a country for the corresponding countdown. Entry and exit days count, and remaining days include today. No timing details are sent to a server.
+
+Blank allowances are explicitly labelled as assumptions: the Schengen maximum (90 days), the usual UK Standard Visitor allowance (six calendar months), or a passport-matrix numeric visa estimate where available. Visa-free/ETA allowances are not substituted for held visas. There is no universal issued-visa default database: unsupported allowances remain unknown. US admission deadlines come from the user's I-94, separately from entry-visa expiry.
+
+Schengen estimates combine logged short visits across all Schengen visas in the wallet, including expired visas and other linked passports. The user must confirm complete history before a remaining stay is shown. A shorter entered total allowance also applies. Old visits fall out of the rolling 180-day window; overlapping records count once. Add separate historical visas as needed. Unrecorded visits, single/multiple-entry restrictions, nationality-specific exceptions and residence-authorised periods require the user's own checks; these clocks do not verify legal entitlement.
+
+Run `npm test` for rule and visa-calendar checks. `tests/visa-browser.js` provides browser integration checks (call `checkVisaClocks()` on a loaded local site with a disposable browser profile; it replaces that profile's wallet).
+
+Citizenship without a passport is a separate wallet type. It adds a residence result for that country in the Live tab only. It never substitutes for a passport, links a visa/permit, or adds passport travel or treaty routes abroad.
+
+**Advanced** below the map downloads a readable, indented JSON file with a `.portpass` extension. The optional name determines the filename (default `profile.portpass`). Version 1 contains `format: "portpass"`, `version: 1`, `name`, and `documents`, including visa timing and history. Import reads the file locally, validates it, and previews the entry count before the user replaces the current wallet. Invalid files leave the wallet untouched. Save the current profile first to keep it. Profiles are plain text, not encrypted; files are never uploaded to Portpass.

@@ -76,13 +76,27 @@
   }
   const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
   function activeDocuments(docs, date = today()) {
-    const valid = docs.filter(d => !d.expiry || d.expiry >= date);
-    return valid.filter(d => d.type === 'passport' || valid.some(p => p.type === 'passport' && p.country === d.passport));
+    const valid = docs.filter(d => d.type === 'citizenship' || (!d.expiry || d.expiry >= date) && (!d.validFrom || d.validFrom <= date));
+    return valid.filter(d => ['passport','citizenship'].includes(d.type) || valid.some(p => p.type === 'passport' && p.country === d.passport));
   }
   function evaluate(destination, docs, mode, matrix, date) {
     const active = activeDocuments(docs, date), passports = active.filter(d => d.type === 'passport');
     const routes = [];
-    const add = (category, document, title, conditions, source, days) => routes.push({category, document, title, conditions, source, days, reviewed: source && source !== sources.passport ? REVIEWED : undefined});
+    const add = (category, document, title, conditions, source, days) => {
+      const timing = category === 'document' && root.PortpassVisaTime?.isVisa(document) ? root.PortpassVisaTime.summary(document, docs, matrix, date) : null;
+      if (timing) {
+        days = timing.limit.unit === 'days' ? timing.limit.value ?? undefined : undefined;
+        if (['exhausted','invalid'].includes(timing.state)) {
+          category = 'conditional';
+          conditions += ' Your recorded visa allowance is used up or the timing details need checking; verify permission before travelling.';
+        }
+        if (timing.limit.assumed) conditions += ' The displayed stay allowance is assumed; check your issued visa.';
+      }
+      routes.push({category, document, title, conditions, source, days, timing, reviewed: source && source !== sources.passport ? REVIEWED : undefined});
+    };
+    if (mode === 'live') for (const citizen of active.filter(d => d.type === 'citizenship' && d.country === destination)) {
+      add('home', citizen, 'Country of citizenship', 'Residence in your country of citizenship. This entry does not represent a passport and does not add travel access or assessed residence routes abroad.', '');
+    }
     for (const p of passports) {
       if (p.country === destination) {
         add('home', p, 'Country of citizenship', 'Travel with the documents required by your country of citizenship. National rules and individual restrictions can still apply.','');
