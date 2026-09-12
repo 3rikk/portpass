@@ -10,7 +10,7 @@ window.PortpassMapExport = {
       muted: token('--muted'), line: token('--line'), accent: token('--green'),
       map: getComputedStyle(document.querySelector('#map-container')).backgroundColor,
       highlight: getComputedStyle(document.querySelector('.stat')).backgroundColor,
-      warning: matchMedia('(prefers-color-scheme: dark)').matches ? '#f1a58d' : '#a55b48'
+      warning: token('--warning') || '#a55b48'
     };
     const categoryColor = key => token(`--category-${key}`) || PortpassRules.categories[key].color;
     const width = 1800, sidebarWidth = 480, left = 16, right = 512, mapWidth = 1272;
