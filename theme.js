@@ -159,6 +159,13 @@ html:root[data-theme="dark"][data-palette] .alpha-continue{color:var(--ink)}
     dialog.querySelector('.alpha-continue').addEventListener('click',()=>{location.href='https://alpha.portpass.world/';});
     dialog.addEventListener('click',event=>{if(event.target===dialog){const rect=dialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)dialog.close();}});
   }
+  function initEnvironmentBadge(){
+    const badge=document.querySelector('.beta');
+    if(!badge)return;
+    const hostname=location.hostname.toLowerCase();
+    badge.textContent=hostname==='alpha.portpass.world'?'ALPHA':'BETA';
+    badge.setAttribute('aria-label',badge.textContent==='ALPHA'?'Alpha environment':'Beta environment');
+  }
 
   apply();
   system.addEventListener('change',apply);
@@ -168,7 +175,7 @@ html:root[data-theme="dark"][data-palette] .alpha-continue{color:var(--ink)}
     if(event.key===themeKey||event.key===paletteKey||event.key===null)apply();
   });
   document.addEventListener('DOMContentLoaded',()=>{
-    buildPalettePicker();apply();initThemeNudge();initAlphaWarning();
+    buildPalettePicker();apply();initEnvironmentBadge();initThemeNudge();initAlphaWarning();
     const select=document.querySelector('#theme-select');
     if(select)select.addEventListener('change',event=>{preference=validTheme(event.target.value);try{localStorage.setItem(themeKey,preference);}catch{}apply();});
   });
