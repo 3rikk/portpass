@@ -18,8 +18,8 @@ for(const territory of R.BOTC_TERRITORIES) {
   assert.equal(run(dest,[p(territory)]).best.days,90);
   assert.equal(run(dest,[p(territory)],'live').category,'unknown');
  }
- assert.equal(run(territory,[p(territory)],'live').category,'conditional');
- assert.equal(run(territory,[p(territory,{localStatus:false})],'live').category,'conditional');
+ assert.equal(run(territory,[p(territory)],'live').category,'unknown');
+ assert.equal(run(territory,[p(territory,{localStatus:false})],'live').category,'unknown');
  assert.equal(run(territory,[p(territory,{localStatus:true})],'live').category,'home');
  assert.equal(run(territory,[p(territory,{localStatus:true})]).category,'home');
  assert.equal(run(territory,[p(territory,{localStatus:true,expiry:'2026-09-11'})],'live').category,'unknown');
@@ -36,7 +36,8 @@ for(const territory of R.BOTC_TERRITORIES) {
 }
 for(const dest of R.BOTC_TERRITORIES) {
  assert.equal(run(dest,[p('GB')]).category,'free');
- assert.equal(run(dest,[p('GB')],'live').category,'conditional');
+ assert.equal(run(dest,[p('GB')],'live').category,'unknown');
+ assert.equal(run(dest,[p('IN')],'live').category,'unknown');
  assert.equal(run(dest,[p('IN'),{id:'r',type:'residence',country:dest,passport:'IN'}],'live').category,'permit');
 }
 assert.equal(run('FK',[p('IN')]).category,'required');
@@ -53,5 +54,5 @@ assert.equal(run('GI',[p('IN'),{...visa,expiry:'2026-09-11'}]).category,'require
 assert.equal(run('GI',[p('IN'),{id:'r',type:'residence',country:'GB',passport:'IN'}]).category,'required');
 assert.equal(run('FR',[p('IN'),{id:'r',type:'residence',country:'GI',passport:'IN'}]).category,'document');
 assert.equal(run('FR',[p('IN'),{id:'r',type:'residence',country:'GI',passport:'IN'}],'live').category,'unknown');
-assert.equal(run('GI',[p('FK',{localStatus:true})],'live').category,'conditional');
-console.log('BOTC nationality isolation, local status, overseas destinations, July Gibraltar rules and profile persistence passed.');
+assert.equal(run('GI',[p('FK',{localStatus:true})],'live').category,'unknown');
+console.log('BOTC nationality isolation, local status, ordinary live handling, overseas destinations, July Gibraltar rules and profile persistence passed.');
