@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict');
+const Theme=require('../scripts/apply-seo-theme.js');
+const input='<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><style>:root{--p:#f7f8f5}</style></head><body></body></html>';
+const output=Theme.inject(input);
+assert.match(output,/<script src="\/theme\.js"><\/script>/);
+assert.match(output,/<link rel="stylesheet" href="\/seo-theme\.css">/);
+assert.match(output,/<meta name="theme-color" content="#f7f8f5"/);
+assert.match(output,/<meta name="theme-color" content="#171e2b"/);
+assert.equal(Theme.inject(output),output,'theme injection is idempotent');
+console.log('SEO theme injection passed: shared preference script, palette and theme-color metadata.');
