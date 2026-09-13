@@ -35,3 +35,4 @@
 .status-arrival{color:var(--status-arrival)!important}
 .status-required{color:var(--status-required)!important}
 .status-restricted{color:var(--status-restricted)!important}
+:root[data-theme="dark"] .button{color:#171e2b!important}
