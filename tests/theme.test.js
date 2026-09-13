@@ -43,9 +43,9 @@ function loadTheme(initial={}) {
 
 const defaults=loadTheme();
 assert.equal(defaults.root.dataset.theme,'light');
-assert.equal(defaults.root.dataset.palette,'default');
+assert.equal(defaults.root.dataset.palette,'rose');
 assert.equal(defaults.swatches.length,6);
-assert.equal(defaults.swatches[0].dataset.palette,'default');
+assert.equal(defaults.swatches[0].dataset.palette,'rose');
 assert.equal(defaults.swatches[0]['aria-checked'],'true');
 assert.ok(defaults.swatches.every(button=>button.textContent===''&&button.title===''),'palette controls have no visible text');
 
@@ -57,4 +57,4 @@ assert.equal(saved.store['portpass-theme'],'dark');
 assert.equal(saved.store['portpass-palette'],'amber');
 assert.equal(saved.swatches.find(button=>button.dataset.palette==='amber')['aria-checked'],'true');
 
-console.log('Theme engine passed: six accent circles, default selection, persistence and independent light/dark mode.');
+console.log('Theme engine passed: rose default, six accent circles, persistence and independent light/dark mode.');
