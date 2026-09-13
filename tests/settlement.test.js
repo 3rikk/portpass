@@ -64,4 +64,7 @@ const schengen={id:'v',type:'schengen',country:'DE',passport:'IN'};
 assert.equal(R.evaluate('AX',[p('IN'),schengen],'visit',matrix,'2026-09-13').category,'document');
 assert.equal(PortpassVisaTime.covers(schengen,'AX'),true);
 assert.equal(PortpassVisaTime.covers(schengen,'FO'),false);
+assert.equal(PortpassVisaTime.covers(schengen,'GL'),false);
+assert.equal(PortpassVisaTime.sharesStayClock(schengen,'FO'),true);
+assert.equal(PortpassVisaTime.sharesStayClock(schengen,'GL'),true);
 console.log('Settlement blocs: corridor coverage, overlapping routes, conditional/proposed boundaries, dates, territories, restrictions, documents and profiles passed.');

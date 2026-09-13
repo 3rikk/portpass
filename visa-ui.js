@@ -15,7 +15,7 @@ function visaHeadline(t) {
 function visaExpiryText(t) {
   return t.expiryDays===null ? 'Visa expiry not entered' : t.expiryDays<0 ? `Visa expired ${-t.expiryDays} days ago` : t.expiryDays===0 ? 'Visa expires today' : `Visa expires in ${t.expiryDays} days · ${visaDate(t.expiry)}`;
 }
-function visaScopeName(d) {return d.type==='schengen' ? 'Schengen · shared across 29 countries' : name(d.country);}
+function visaScopeName(d) {return d.type==='schengen' ? 'Schengen · shared 90/180-day clock' : name(d.country);}
 function visaTimingMarkup(d, compact=false) {
   const t=VT.summary(d,docs,matrix);if(!t)return '';
   const badge=t.limit.value===null?'Unknown allowance':t.limit.assumed?'Assumed allowance':'Entered allowance';
@@ -23,16 +23,17 @@ function visaTimingMarkup(d, compact=false) {
   return `<div class="visa-timing ${t.urgency}"><strong>${escapeHTML(visaHeadline(t))}</strong><span class="assumption-tag" title="${escapeHTML(t.limit.basis)}">${badge}</span><small>${escapeHTML(visaExpiryText(t))}</small>${!compact&&t.remaining>0?`<small>${t.estimated?'Estimated':'Recorded'} last day: ${visaDate(t.leaveBy)} · includes today</small>`:''}${!compact&&total!==null&&t.started&&t.historyReady?`<progress max="${total}" value="${Math.min(total,t.used)}" aria-label="${t.used} of ${total} days used"></progress><small>${t.used} days logged${t.basis==='rolling'?' in the last 180 days':''}</small>`:''}${!compact?`<small>${escapeHTML(t.error || (!t.historyReady?'Confirm complete visit history for a remaining-stay estimate.':!t.started?'Add your arrival date to track days used.':t.limit.basis))}</small>`:''}</div>`;
 }
 function visaDetailsMarkup(code) {
-  const visas=docs.filter(d=>VT.covers(d,code));
+  const visas=docs.filter(d=>VT.sharesStayClock(d,code));
   if(!visas.length)return '';
+  const outsideSchengen=code==='GL'||code==='FO';
   return `<section class="country-visa-times"><h3>Your visa clocks</h3>${visas.map(d=>{
     const t=VT.summary(d,docs,matrix);
-    return `<article class="visa-detail"><div class="section-heading"><h3>${escapeHTML(visaScopeName(d))}</h3><button class="text-button" data-edit="${escapeHTML(d.id)}">Edit timing</button></div><p>Linked to your ${escapeHTML(name(d.passport))} passport${d.type==='schengen'?' · one allowance across the bloc, not per country':''}.</p>${visaTimingMarkup(d)}<p>${escapeHTML(t.limit.basis)}${t.limit.assumed?'. This is an assumption, not a verified grant.':''}</p>${t.limit.source?`<a href="${t.limit.source}" target="_blank" rel="noopener">Duration source ↗</a>`:''}<p class="form-note">Visa validity and permission to stay are separate. The clock uses your entries; unrecorded trips, entry limits and border decisions can change the result.${d.type==='schengen'?' Include all short visits to Schengen, even on another passport or visa. Do not count residence-authorised days in your country of residence.':''}</p></article>`;
+    return `<article class="visa-detail"><div class="section-heading"><h3>${escapeHTML(visaScopeName(d))}</h3><button class="text-button" data-edit="${escapeHTML(d.id)}">Edit timing</button></div><p>Linked to your ${escapeHTML(name(d.passport))} passport${d.type==='schengen'?' · one allowance across the shared stay area, not per country':''}.</p>${outsideSchengen&&d.type==='schengen'?'<p class="form-note">This stay counts toward the shared clock, but an ordinary Schengen visa does not itself authorise entry here.</p>':''}${visaTimingMarkup(d)}<p>${escapeHTML(t.limit.basis)}${t.limit.assumed?'. This is an assumption, not a verified grant.':''}</p>${t.limit.source?`<a href="${t.limit.source}" target="_blank" rel="noopener">Duration source ↗</a>`:''}<p class="form-note">Visa validity and permission to stay are separate. The clock uses your entries; unrecorded trips, entry limits and border decisions can change the result.${d.type==='schengen'?' Include all short visits to Schengen, Greenland and the Faroe Islands, even on another passport or visa. Do not count residence-authorised days in your country of residence.':''}</p></article>`;
   }).join('')}</section>`;
 }
 function showMapTooltip(e, feature) {
   const code=feature.properties.code, box=$('#map-container').getBoundingClientRect(),tip=$('#tooltip');
-  const visas=docs.filter(d=>VT.covers(d,code));
+  const visas=docs.filter(d=>VT.sharesStayClock(d,code));
   tip.innerHTML=`<strong>${escapeHTML(feature.properties.label)}</strong><div>${C[results[code]?.category||'unknown'].label}</div>${visas.slice(0,2).map(d=>{const t=VT.summary(d,docs,matrix);return `<div class="tooltip-clock"><b>${escapeHTML(visaHeadline(t))}</b><span>${escapeHTML(visaExpiryText(t))}</span>${d.type==='schengen'?'<span>Shared Schengen clock</span>':''}${t.remaining!==null?'<span>Includes today · open for details</span>':''}</div>`;}).join('')}${visas.length>2?`<span>Open for ${visas.length} visa clocks</span>`:''}`;
   tip.style.display='block';
   const target=e.currentTarget?.getBoundingClientRect();
@@ -45,8 +46,8 @@ function showMapTooltip(e, feature) {
 function updateVisaFocus() {
   const selected=docs.find(d=>d.id===focusedVisaId&&VT.isVisa(d));
   if(!selected)focusedVisaId=null;
-  mapPaths?.attr('opacity',f=>!selected||VT.covers(selected,f.properties.code)?1:.25)
-    .classed('visa-focus',f=>!!selected&&VT.covers(selected,f.properties.code));
+  mapPaths?.attr('opacity',f=>!selected||VT.sharesStayClock(selected,f.properties.code)?1:.25)
+    .classed('visa-focus',f=>!!selected&&VT.sharesStayClock(selected,f.properties.code));
   document.querySelectorAll('[data-visa-focus]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.visaFocus===focusedVisaId)));
 }
 function renderVisaClocks() {
@@ -91,8 +92,8 @@ function updateVisaFields() {
   if(schengen)$('#visa-stay-unit').value='days';
   $('#visa-stay-duration').max=schengen?'90':'3650';
   $('#visa-stay-basis').innerHTML=schengen?'<option value="rolling">Shared limit per rolling 180 days</option><option value="total">Total days authorised on this visa</option>':'<option value="perVisit">Per visit</option><option value="total">Total across visits on this visa</option>';
-  $('#visa-history-label').textContent=schengen?'I have recorded all my Schengen short visits in this wallet, including on other visas or passports.':'I have recorded all previous visits on this visa.';
-  $('#visa-history-help').textContent=schengen?'One clock covers all 29 Schengen countries. Add earlier trips on this or other Schengen visas in your wallet, including expired visas. Residence-authorised stays in the residence country are excluded. Entry and exit days both count.':'Previous visits are used for a total visa allowance. For a per-visit allowance, the clock starts from your arrival date.';
+  $('#visa-history-label').textContent=schengen?'I have recorded all my short visits to Schengen, Greenland and the Faroe Islands, including on other visas or passports.':'I have recorded all previous visits on this visa.';
+  $('#visa-history-help').textContent=schengen?'One 90/180-day clock includes the 29 Schengen countries, Greenland and the Faroe Islands. Add earlier trips on this or other visas in your wallet, including expired visas. Residence-authorised stays in the residence country are excluded. Entry and exit days both count.':'Previous visits are used for a total visa allowance. For a per-visit allowance, the clock starts from your arrival date.';
   updateVisaAssumption();
 }
 function openDocumentForm(id=null) {

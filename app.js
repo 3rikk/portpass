@@ -106,10 +106,11 @@ function updateDocumentConditions() {
   const type=$('#document-type').value, country=$('#document-country').value;
   const usResidence=type==='residence' && country==='US';
   const schengenVisa=VT.isVisa({type}) && R.SCHENGEN.includes(country);
+  const multipleEntryVisa=VT.isVisa({type}) && (schengenVisa || (type==='visa' && ['CA','JP','US','GB'].includes(country)));
   $('#permanent-label').hidden=!usResidence;
-  $('#multiple-entry-label').hidden=!schengenVisa;
+  $('#multiple-entry-label').hidden=!multipleEntryVisa;
   $('#previously-used-label').hidden=!schengenVisa;
-  $('#document-conditions').hidden=!usResidence && !schengenVisa;
+  $('#document-conditions').hidden=!usResidence && !multipleEntryVisa;
 }
 function updateDocumentForm() {
   const type=$('#document-type').value, selection=$('#document-country').value;

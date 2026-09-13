@@ -20,7 +20,11 @@
   }
   const isVisa = d => d.type === 'visa' || d.type === 'schengen';
   const scope = d => d.type === 'schengen' ? 'Schengen' : d.country;
+  // Entry coverage and the shared stay clock are deliberately separate:
+  // ordinary Schengen visas do not grant entry to Greenland or the Faroes,
+  // although short visits there count toward the same 90/180-day allowance.
   const covers = (d, country) => isVisa(d) && (d.type === 'schengen' ? root.PortpassRules.SCHENGEN.includes(country) && root.PortpassRules.SCHENGEN.includes(d.country) : d.country === country);
+  const sharesStayClock = (d, country) => isVisa(d) && (d.type === 'schengen' ? root.PortpassRules.SCHENGEN_STAY_SCOPE.includes(country) && root.PortpassRules.SCHENGEN.includes(d.country) : d.country === country);
   function allowance(d, matrix) {
     if (Number.isInteger(d.stayDuration) && d.stayDuration > 0 && d.stayDuration <= 3650) return {
       value:d.stayDuration, unit:d.stayUnit === 'months' ? 'months' : 'days', assumed:false,
@@ -111,7 +115,7 @@
     const urgency=['invalid','unlinked','future'].includes(state)?'unknown':['expired','exhausted'].includes(state)?'ended':attention===null?'unknown':attention<=7?'urgent':attention<=30?'soon':'comfortable';
     return {error,id:d.id,scope:scope(d),limit,basis,remaining,leaveBy:leaveBy===null?null:iso(leaveBy),used,usedRolling,windowRemaining,
       expiryDays,expiry:d.expiry||null,starts:d.validFrom||null,entry:d.entryDate||null,state,urgency,historyReady,
-      estimated:limit.assumed||d.type==='schengen'||admitted===null, started, covers:country=>covers(d,country)};
+      estimated:limit.assumed||d.type==='schengen'||admitted===null, started, covers:country=>covers(d,country), sharesStayClock:country=>sharesStayClock(d,country)};
   }
   function validate(d, date = root.PortpassRules.today()) {
     if (!isVisa(d)) return '';
@@ -140,5 +144,5 @@
     }
     return '';
   }
-  root.PortpassVisaTime={sources,day,iso,addMonths,isVisa,covers,allowance,summary,validate,merge,count};
+  root.PortpassVisaTime={sources,day,iso,addMonths,isVisa,covers,sharesStayClock,allowance,summary,validate,merge,count};
 })(globalThis);

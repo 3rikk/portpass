@@ -90,7 +90,9 @@ assert.equal(run('FR',[p('US')],'visit',{US:{FR:{status:'no admission'}}}).categ
 assert.equal(run('FR',[p('US'),permit('DE','US')],'visit',{US:{FR:{status:'no admission'}}}).category,'restricted');
 for (const destination of ['IE','CY','GB'])assert.equal(run(destination,[p('US')],'visit',{}).category,'unknown');
 assert.equal(run('FR',[p('BR')],'visit',{}).best.source,R.sources.brazil);
-assert.equal(run('FR',[p('BR')],'visit',{}).best.days,undefined);
+assert.equal(run('FR',[p('BR')],'visit',{}).best.days,90);
+assert.equal(R.evaluate('FR',[p('BR')],'visit',matrix,'2026-02-28').best.days,undefined);
+assert.equal(R.evaluate('FR',[p('BR')],'visit',matrix,'2026-03-01').best.days,90);
 assert.equal(run('FR',[p('RS'),{type:'visa',country:'FR',passport:'RS'}],'visit',{}).category,'document');
 console.log('Passed: CTA, EU/EEA/Swiss/EFTA corridor matrix, Liechtenstein quotas, visa-waiver matrix, passport conditions, expiry, restrictions, permit and nationality boundaries.');
 
@@ -126,7 +128,19 @@ for(const destination of ['CA','MX']) {
  assert.equal(run(destination,[p('IN'),greenCard],'live',{}).category,'unknown');
  assert.equal(run(destination,[p('IN'),greenCard],'visit',{IN:{[destination]:{status:'no admission'}}}).category,'restricted');
 }
+const mexicoVisa={type:'visa',country:'US',passport:'IN',multipleEntry:true};
+assert.equal(run('MX',[p('IN'),mexicoVisa],'visit',{}).category,'document');
+assert.equal(run('MX',[p('IN'),{...mexicoVisa,multipleEntry:false}],'visit',{}).category,'required');
+assert.equal(run('MX',[p('IN'),{...permit('CL','IN'),permanent:true}],'visit',{}).category,'document');
+const canadaEta={type:'visa',country:'US',passport:'ID',expiry:'2026-12-01'};
+assert.equal(R.evaluate('CA',[p('ID'),canadaEta],'visit',matrix,'2026-09-12').category,'online');
+assert.equal(R.evaluate('CA',[p('ID'),canadaEta],'visit',matrix,'2026-05-25').category,'required');
+assert.equal(R.evaluate('CA',[p('ID'),canadaEta],'visit',matrix,'2026-05-26').category,'online');
+assert.equal(R.evaluate('CA',[p('ID'),{...canadaEta,expiry:'2026-09-11'}],'visit',matrix,'2026-09-12').category,'required');
+assert.equal(R.evaluate('CA',[p('IN'),{...canadaEta,passport:'IN'}],'visit',matrix,'2026-09-12').category,'required');
 const schengen={type:'schengen',country:'DE',passport:'IN',multipleEntry:true,previouslyUsed:true};
+assert.equal(R.evaluate('GL',[p('IN'),permit('DE','IN')],'visit',matrix,'2026-03-19').category,'required');
+assert.equal(R.evaluate('GL',[p('IN'),permit('DE','IN')],'visit',matrix,'2026-03-20').category,'document');
 for(const destination of ['AL','RS','ME']) {
  assert.equal(run(destination,[p('IN'),schengen],'visit',{}).category,'document');
  assert.equal(run(destination,[p('IN'),permit('DE','IN')],'visit',{}).category,'document');
@@ -154,6 +168,6 @@ const exhausted={...schengen,stayDuration:1,stayBasis:'total',stayUnit:'days',hi
 assert.equal(run('FR',[p('IN'),exhausted],'visit',{}).category,'conditional');
 const outside=run('ME',[p('IN'),exhausted],'visit',{});
 assert.equal(outside.category,'document');assert.equal(outside.best.days,30);assert.equal(outside.best.timing,null);
-console.log('Passed: TTTA, green cards, third-country exemptions, Greenland, dated China waiver and separate stay clocks.');
+console.log('Passed: TTTA, green cards, third-country exemptions, Greenland, dated China waiver and shared stay clocks.');
 assert.equal(run('AU',[p('NZ')],'visit',{NZ:{AU:{status:'no admission'}}}).category,'restricted');
 assert.equal(run('GL',[p('DK')],'visit',{DK:{GL:{status:'no admission'}}}).category,'restricted');

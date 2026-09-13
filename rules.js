@@ -5,6 +5,7 @@
   const EFTA = ['IS', 'LI', 'NO', 'CH'];
   const REVIEWED = '2026-09-13';
   const SCHENGEN = 'AT BE BG HR CZ DK EE FI FR DE GR HU IT LV LT LU MT NL PL PT RO SK SI ES SE IS LI NO CH AX'.split(' ');
+  const SCHENGEN_STAY_SCOPE = [...SCHENGEN, 'GL', 'FO'];
   const BOTC_TERRITORIES = ['GI','FK','BM','KY'];
   const EXTRA_DESTINATIONS = ['GL','FO','AX','GG','JE','IM',...BOTC_TERRITORIES];
   const passportCodes = matrix => [...new Set([...Object.keys(matrix),...BOTC_TERRITORIES])];
@@ -36,7 +37,7 @@
     albania: 'https://punetejashtme.gov.al/en/regjimi-i-vizave-per-te-huajt/',
     serbia: 'https://www.mfa.rs/en/citizens/travel-serbia/visa-requirements',
     montenegro: 'https://www.gov.me/en/article/visas',
-    mexico: 'https://consulmex.sre.gob.mx/denver/index.php/visasparapersonasextranjeras',
+    mexico: 'https://consulmex.sre.gob.mx/estambul/index.php/consular-services/visa-application',
     passport: 'https://github.com/imorte/passport-index-data',
     travel: 'https://europa.eu/youreurope/citizens/travel/entry-exit/non-eu-nationals/index_en.htm',
     residence: 'https://europa.eu/youreurope/citizens/residence/residence-rights/index_en.htm',
@@ -392,12 +393,13 @@
           const confirmed = !requirement || p[requirement.key] === true;
           const denied = requirement && p[requirement.key] === false;
           const category = confirmed ? 'free' : denied ? 'required' : 'conditional';
-          const stay = p.country === 'BR' && EU.includes(destination)
+          const brazilOldCalculation = p.country === 'BR' && EU.includes(destination) && date < '2026-03-01';
+          const stay = brazilOldCalculation
             ? 'The EU–Brazil ordinary-passport agreement uses a special three-month/six-month calculation from first entry; check the applicable calculation with the destination.'
             : 'Short stays share a maximum of 90 days in any rolling 180-day period across Schengen, not per destination.';
           const conditions = (requirement ? requirement.detail + (confirmed ? ' You confirmed this condition. ' : denied ? ' You indicated this condition is not met; a visa is required unless another exemption applies. ' : ' Confirm this in your passport details before treating the route as visa-free. ') : '')
             + stay + ' This is short-visit access, not residence or work permission. Ordinary passports only; check passport validity, purpose, funds, return travel and any travel-authorisation requirements in force on your travel date.';
-          add(category, p, confirmed ? 'EU / Schengen visa waiver' : denied ? 'Passport does not meet visa-waiver conditions' : 'Visa waiver — passport check needed', conditions, p.country === 'BR' && EU.includes(destination) ? sources.brazil : sources.visaWaiver, confirmed && p.country !== 'BR' ? 90 : undefined);
+          add(category, p, confirmed ? 'EU / Schengen visa waiver' : denied ? 'Passport does not meet visa-waiver conditions' : 'Visa waiver — passport check needed', conditions, p.country === 'BR' && EU.includes(destination) ? sources.brazil : sources.visaWaiver, confirmed && !brazilOldCalculation ? 90 : undefined);
           continue;
         }
       }
@@ -437,8 +439,10 @@
       if (mode === 'visit') {
         if (date >= '2026-07-15' && destination === 'GI' && (schengenVisa || (residence && SCHENGEN.includes(d.country)))) exemption('Gibraltar access with a Schengen document', 'Gibraltar recognises valid Schengen short-stay visas and qualifying Schengen residence permits under its July 2026 arrangements. Check territory coverage, remaining entries and the applicable 90/180-day stay calculation.', sources.gibraltar, 90);
         if (date >= '2026-07-15' && SCHENGEN.includes(destination) && residence && d.country === 'GI') exemption('Gibraltar resident short-visit access', 'The July 2026 Gibraltar arrangements provide short-visit access for legal Gibraltar residents. Carry the recognised residence document and passport; verify the applicable 90/180-day allowance.', sources.gibraltar, 90);
-        if (destination === 'CA' && residence && d.country === 'US') exemption('US green card exemption', 'US lawful permanent residents need neither a visitor visa nor an eTA. A valid passport and green card (or accepted proof of status) are required for air travel; direct land/water arrivals from the US or Saint-Pierre-et-Miquelon can use proof of status alone.', sources.canada, undefined, ['permanent']);
-        if (destination === 'MX' && residence && ['US','CA','JP','GB',...SCHENGEN].includes(d.country)) exemption('Permanent resident exemption for Mexico', 'Requires proof of permanent residence, not a temporary residence permit. Admission is for tourism, transit or other non-remunerated visits; the border officer determines the stay.', sources.mexico, undefined, ['permanent']);
+        if (destination === 'CA' && residence && d.country === 'US') exemption('US green card exemption', 'US lawful permanent residents need neither a visitor visa nor an eTA. A valid passport or travel document and a valid green card (or accepted proof of status) are required for all methods of travel.', sources.canada, undefined, ['permanent']);
+        if (date >= '2026-05-26' && destination === 'CA' && d.type === 'visa' && d.country === 'US' && ['ID','MY'].includes(d.passport)) add('online', d, 'Canada eTA eligibility for Indonesian or Malaysian citizens', 'Indonesian and Malaysian citizens may qualify to fly to Canada with an eTA instead of a visitor visa when they hold a valid US non-immigrant visa, subject to the remaining Canadian eligibility requirements. Obtain the eTA before flying; other travel methods and purposes may require different documents.', sources.canada);
+        if (destination === 'MX' && residence && ['US','CA','JP','GB','CL','CO','PE',...SCHENGEN].includes(d.country)) exemption('Permanent resident exemption for Mexico', 'Requires proof of permanent residence, not a temporary residence permit. Mexico also recognises permanent residence from Chile, Colombia and Peru under the Pacific Alliance. Admission is for tourism, transit or other non-remunerated visits; the border officer determines the stay.', sources.mexico, undefined, ['permanent']);
+        if (destination === 'MX' && visa && ['CA','JP','US','GB',...SCHENGEN].includes(d.country)) exemption('Third-country visa exemption for Mexico', 'Requires a valid multiple-entry visa issued by Canada, Japan, the United States, the United Kingdom or a Schengen country. Admission is for tourism, transit or other non-remunerated visits; the border officer determines the stay.', sources.mexico, undefined, ['multipleEntry']);
         if (destination === 'AL') {
           if (schengenVisa) exemption('Schengen visa exemption for Albania', 'Requires a valid multiple-entry Schengen visa previously used in Schengen. Check the permitted stay and the document-expiry departure deadline with Albania.', sources.albania, undefined, ['multipleEntry','previouslyUsed']);
           else if (residence && SCHENGEN.includes(d.country)) exemption('Schengen residence exemption for Albania', 'Requires a valid Schengen residence permit. Check the permitted stay and the document-expiry departure deadline with Albania.', sources.albania);
@@ -446,7 +450,7 @@
         }
         if (destination === 'RS' && ((visa && (schengenVisa || [...EU,'GB','US'].includes(d.country))) || (residence && [...SCHENGEN,...EU,'US'].includes(d.country)))) exemption('Third-country document exemption for Serbia', 'Up to 90 days during six months, within the validity of the qualifying visa or residence permit. National passports only; emergency and convention travel documents are excluded.', sources.serbia, 90);
         if (destination === 'ME' && (residence || visa) && (schengenVisa || [...SCHENGEN,'AU','JP','CA','NZ','IE','US','GB'].includes(d.country))) exemption('Third-country document exemption for Montenegro', 'Up to 30 days, never beyond the expiry of the qualifying visa or residence permit.', sources.montenegro, 30);
-        if (['GL','FO'].includes(destination) && residence && SCHENGEN.includes(d.country)) exemption('Schengen residence permit access to ' + (destination === 'GL' ? 'Greenland' : 'the Faroe Islands'), 'Requires a valid residence permit allowing entry and residence in Denmark. Bring the physical residence card and passport. This territory has a separate short-visit allowance; a Schengen visitor visa alone does not qualify.', sources.greenland, 90);
+        if (date >= '2026-03-20' && ['GL','FO'].includes(destination) && residence && SCHENGEN.includes(d.country)) exemption('Schengen residence permit access to ' + (destination === 'GL' ? 'Greenland' : 'the Faroe Islands'), 'Requires a valid residence permit allowing entry and residence in Denmark. Bring the physical residence card and passport. Short stays count toward the shared 90 days in any 180-day period, including stays in Greenland and the Faroe Islands; a Schengen visitor visa alone does not qualify.', sources.greenland, 90);
       }
       if (d.type === 'residence' && d.country === destination) {
         add('permit', d, 'Your residence permit', 'Based on the permit you entered. Residence, re-entry and work permissions depend on its category, validity and conditions. This is not an independent verification of your status.', '');
@@ -459,5 +463,5 @@
     routes.sort((a,b) => categories[b.category].rank-categories[a.category].rank || (b.days || 0)-(a.days || 0));
     return {category: routes[0]?.category || 'unknown', best: routes[0], routes};
   }
-  root.PortpassRules = { SETTLEMENT_BLOCS, settlementAgreements, ASSOCIATION_ROUTES, associationOptions, validateAssociation, associationAssessment, BOTC_TERRITORIES, FALKLANDS_VISA_REQUIRED, passportCodes, EXTRA_DESTINATIONS, destinationCodes, EU, EEA, EFTA, SCHENGEN, REVIEWED, VISA_WAIVER, BIOMETRIC, sources, sourceLabels, categories, passportRequirement, movementAgreement, activeDocuments, evaluate, today };
+  root.PortpassRules = { SETTLEMENT_BLOCS, settlementAgreements, ASSOCIATION_ROUTES, associationOptions, validateAssociation, associationAssessment, BOTC_TERRITORIES, FALKLANDS_VISA_REQUIRED, passportCodes, EXTRA_DESTINATIONS, destinationCodes, EU, EEA, EFTA, SCHENGEN, SCHENGEN_STAY_SCOPE, REVIEWED, VISA_WAIVER, BIOMETRIC, sources, sourceLabels, categories, passportRequirement, movementAgreement, activeDocuments, evaluate, today };
 })(globalThis);
