@@ -1,9 +1,12 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
+require('../visa-time.js');require('../rules.js');require('../profile.js');
 const SEO=require('../scripts/generate-seo.js');
 const german=SEO.overview('DE');
 assert.ok(german.visitKnown>0,'German overview has visit data');
 assert.ok(german.liveKnown>0,'German overview has live data');
+const belarus=SEO.overview('BY');
+for(const territory of ['GI','FK','BM','KY'])assert.equal(belarus.live.find(x=>x.destination===territory)?.result.category,'unknown',territory+' is not a Belarus residence route');
 const swiss=SEO.destinationHTML('DE','CH',SEO.CONFIG.baseUrl);
 assert.equal(swiss.visit.category,'free');
 assert.equal(swiss.live.category,'live');
@@ -20,9 +23,15 @@ try {
  assert.ok(output.total>200,'controlled corpus generated');
  const germany=path.join(root,'passport','germany','index.html');
  const germanySwiss=path.join(root,'passport','germany','switzerland','index.html');
+ const belarusOverview=path.join(root,'passport','belarus','index.html');
+ const belarusLive=path.join(root,'passport','belarus','live','index.html');
  const proof=path.join(root,'travel','india','germany-residence-permit','albania','index.html');
- for(const file of [germany,germanySwiss,proof])assert.ok(fs.existsSync(file),file);
+ for(const file of [germany,germanySwiss,belarusOverview,belarusLive,proof])assert.ok(fs.existsSync(file),file);
  assert.match(fs.readFileSync(germanySwiss,'utf8'),/https:\/\/portpass\.world\/passport\/germany\/switzerland\//);
+ for(const file of [belarusOverview,belarusLive]) {
+  const html=fs.readFileSync(file,'utf8');
+  for(const territory of ['Gibraltar','Falkland Islands','Bermuda','Cayman Islands'])assert.ok(!html.includes(territory),territory+' is not emitted as a Belarus residence highlight');
+ }
  const sitemap=fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');
  const guides=JSON.parse(fs.readFileSync(path.join(root,'seo-search.json'),'utf8'));
  const swissGuide=guides.find(guide=>guide.url==='/passport/germany/switzerland/');
@@ -45,5 +54,5 @@ try {
   assert.match(html,/<meta name="robots" content="index,follow">/);
  }
 
- console.log('SEO generation passed: engine-backed overview, distinct visit/live, compound permit route, filtering and sitemap.');
+ console.log('SEO generation passed: engine-backed overview, distinct visit/live, BOT filtering, compound permit route, filtering and sitemap.');
 } finally {fs.rmSync(root,{recursive:true,force:true});}
