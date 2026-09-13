@@ -1,6 +1,7 @@
 # Only publish the static site; exclude dependencies and repository files.
 /*
 !/index.html
+!/404.html
 !/impressum.html
 !/style.css
 !/app.js
