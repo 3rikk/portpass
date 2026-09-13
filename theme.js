@@ -19,7 +19,9 @@
   window.addEventListener('storage',event=>{if(event.key===key||event.key===null){preference=valid(event.newValue);apply();}});
   document.addEventListener('DOMContentLoaded',()=>{
     apply();
-    document.querySelector('#theme-select').addEventListener('change',event=>{
+    const select=document.querySelector('#theme-select');
+    if(!select)return;
+    select.addEventListener('change',event=>{
       preference=valid(event.target.value);
       try{localStorage.setItem(key,preference);}catch{}
       apply();
