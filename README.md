@@ -1,9 +1,8 @@
 # Portpass
 
-https://portpass.world
+ Visit at https://portpass.world
 
-<img width="1505" height="856" alt="image" src="https://github.com/user-attachments/assets/023d88b6-12f8-40a4-843a-04a8a8615386" />
-
+![Portpass dark mode banner](assets/portpass-banner.png)
 
 ## Features
 
@@ -15,6 +14,8 @@ https://portpass.world
 - Best available route plus all assessed alternatives, conditions and provenance.
 - Browser-local wallet. No scans or document numbers; no third-party runtime requests.
 - Empty first-run state. Add a passport to begin. Expired documents and documents without an active linked passport are excluded.
+
+<img width="1505" height="856" alt="Portpass app screenshot" src="https://github.com/user-attachments/assets/023d88b6-12f8-40a4-843a-04a8a8615386" />
 
 ## Sources and limitations
 
