@@ -74,7 +74,7 @@ html:root[data-theme="dark"] .palette-swatch[data-palette="default"]{--swatch:#9
     picker.className='palette-picker';picker.setAttribute('role','radiogroup');picker.setAttribute('aria-label','Accent colour');
     for(const id of palettes){
       const button=document.createElement('button');
-      button.type='button';button.className='palette-swatch';button.dataset.palette=id;button.setAttribute('role','radio');button.setAttribute('aria-label',names[id]+' accent');button.title=names[id];button.style.setProperty('--swatch',swatches[id]);
+      button.type='button';button.className='palette-swatch';button.dataset.palette=id;button.setAttribute('role','radio');button.setAttribute('aria-label',names[id]+' accent');button.style.setProperty('--swatch',swatches[id]);
       button.addEventListener('click',()=>{palette=id;try{localStorage.setItem(paletteKey,palette);}catch{}apply();});
       picker.appendChild(button);
     }
