@@ -2,7 +2,7 @@
   "name": "portpass",
   "private": true,
   "scripts": {
-    "build:seo": "node scripts/generate-seo.js",
+    "build:seo": "node -r ./visa-time.js -r ./rules.js -r ./profile.js scripts/generate-seo.js",
     "dev": "wrangler dev --config wrangler.jsonc",
     "deploy:worker": "npm run build:seo && wrangler deploy --config wrangler.jsonc",
     "deploy:pages": "npm run build:seo && wrangler pages deploy . --project-name=portpass --config wrangler.pages.jsonc",
