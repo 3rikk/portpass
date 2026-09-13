@@ -54,7 +54,15 @@ html:root[data-palette] .palette-swatch{width:18px;height:18px;min-width:18px;pa
 html:root[data-palette] .palette-swatch:hover{transform:scale(1.08)}
 html:root[data-palette] .palette-swatch[aria-checked="true"]{box-shadow:0 0 0 2px var(--surface),0 0 0 4px color-mix(in srgb,var(--ink) 48%,transparent)}
 html:root[data-theme="dark"] .palette-swatch[data-palette="default"]{--swatch:#9cb5db}
-@media(prefers-reduced-motion:reduce){html:root[data-palette] .palette-swatch{transition:none}}
+html:root[data-palette] .theme-nudge{position:fixed;z-index:45;display:flex;align-items:center;gap:8px;max-width:230px;padding:7px 7px 7px 11px;border:1px solid var(--line);border-radius:9px;background:color-mix(in srgb,var(--surface) 96%,var(--paper));color:var(--ink);box-shadow:0 5px 18px color-mix(in srgb,var(--ink) 9%,transparent);font-size:11px;font-weight:600;letter-spacing:.01em;opacity:0;transform:translateY(-4px);transition:opacity .14s ease,transform .14s ease}
+html:root[data-palette] .theme-nudge::before{content:"";position:absolute;top:-6px;right:22px;width:10px;height:10px;background:inherit;border-left:1px solid var(--line);border-top:1px solid var(--line);transform:rotate(45deg)}
+html:root[data-palette] .theme-nudge.is-visible{opacity:1;transform:translateY(0)}
+html:root[data-palette] .theme-nudge.is-closing{opacity:0;transform:translateY(-4px)}
+html:root[data-palette] .theme-nudge-close{display:grid;place-items:center;width:28px;height:28px;min-width:28px;margin:-3px -2px -3px 1px;border-radius:7px;color:var(--muted);font-size:17px;line-height:1}
+html:root[data-palette] .theme-nudge-close:hover{background:var(--palette-soft-2);color:var(--ink)}
+html:root[data-palette] .theme-nudge-close:focus-visible{outline:2px solid var(--green);outline-offset:1px}
+@media(max-width:480px){html:root[data-palette] .theme-nudge{max-width:210px}}
+@media(prefers-reduced-motion:reduce){html:root[data-palette] .palette-swatch,html:root[data-palette] .theme-nudge{transition:none}}
 `;
   document.head.appendChild(style);
 
@@ -86,6 +94,45 @@ html:root[data-theme="dark"] .palette-swatch[data-palette="default"]{--swatch:#9
     }
     themeControl.insertAdjacentElement('afterend',picker);
   }
+  function initThemeNudge(){
+    const menuButton=document.querySelector('#header-menu-button');
+    if(!menuButton)return;
+    const visitKey='portpass-home-visit-count-v1',sessionKey='portpass-home-session-v1',shownKey='portpass-theme-nudge-shown-v1';
+    let visits=0;
+    try{
+      if(!sessionStorage.getItem(sessionKey)){
+        visits=(Number.parseInt(localStorage.getItem(visitKey)||'0',10)||0)+1;
+        localStorage.setItem(visitKey,String(visits));
+        sessionStorage.setItem(sessionKey,'1');
+      } else visits=Number.parseInt(localStorage.getItem(visitKey)||'1',10)||1;
+      if(visits!==2||localStorage.getItem(shownKey)==='1')return;
+      localStorage.setItem(shownKey,'1');
+    }catch{return;}
+
+    const bubble=document.createElement('aside');
+    bubble.className='theme-nudge';bubble.setAttribute('role','status');bubble.setAttribute('aria-live','polite');
+    const text=document.createElement('span');text.textContent='New: Custom Themes!';
+    const closeButton=document.createElement('button');closeButton.type='button';closeButton.className='theme-nudge-close';closeButton.setAttribute('aria-label','Dismiss custom themes notice');closeButton.textContent='×';
+    bubble.append(text,closeButton);document.body.appendChild(bubble);
+
+    let timer;
+    const position=()=>{
+      const rect=menuButton.getBoundingClientRect();
+      bubble.style.top=Math.round(rect.bottom+10)+'px';
+      bubble.style.right=Math.max(10,Math.round(window.innerWidth-rect.right))+'px';
+    };
+    const remove=()=>{
+      if(!bubble.isConnected)return;
+      bubble.classList.add('is-closing');bubble.classList.remove('is-visible');
+      clearTimeout(timer);window.removeEventListener('resize',position);window.removeEventListener('scroll',position,true);menuButton.removeEventListener('click',remove);
+      setTimeout(()=>bubble.remove(),140);
+    };
+    closeButton.addEventListener('click',remove);
+    menuButton.addEventListener('click',remove);
+    window.addEventListener('resize',position);window.addEventListener('scroll',position,true);
+    position();requestAnimationFrame(()=>bubble.classList.add('is-visible'));
+    timer=setTimeout(remove,30000);
+  }
 
   apply();
   system.addEventListener('change',apply);
@@ -95,7 +142,7 @@ html:root[data-theme="dark"] .palette-swatch[data-palette="default"]{--swatch:#9
     if(event.key===themeKey||event.key===paletteKey||event.key===null)apply();
   });
   document.addEventListener('DOMContentLoaded',()=>{
-    buildPalettePicker();apply();
+    buildPalettePicker();apply();initThemeNudge();
     const select=document.querySelector('#theme-select');
     if(select)select.addEventListener('change',event=>{preference=validTheme(event.target.value);try{localStorage.setItem(themeKey,preference);}catch{}apply();});
   });
