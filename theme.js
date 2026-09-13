@@ -61,7 +61,7 @@ html:root[data-palette] .theme-nudge.is-closing{opacity:0;transform:translateY(-
 html:root[data-palette] .theme-nudge-close{display:grid;place-items:center;width:28px;height:28px;min-width:28px;margin:-3px -2px -3px 1px;border-radius:7px;color:var(--muted);font-size:17px;line-height:1}
 html:root[data-palette] .theme-nudge-close:hover{background:var(--palette-soft-2);color:var(--ink)}
 html:root[data-palette] .theme-nudge-close:focus-visible{outline:2px solid var(--green);outline-offset:1px}
-html:root[data-palette] .alpha-site-button{font:inherit;color:inherit;text-decoration:underline;text-underline-offset:3px;padding:0}
+html:root[data-palette] .alpha-site-button{font:inherit;color:inherit;text-decoration:none;padding:0}
 html:root[data-palette] .alpha-warning-copy a{color:inherit;text-decoration:underline;text-underline-offset:3px}
 html:root[data-palette] .alpha-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}
 html:root[data-palette] .alpha-actions button{padding:13px;border-radius:7px;font-size:12px}
@@ -203,7 +203,7 @@ html:root[data-palette] .export-theme-controls>.export-palette-picker{position:a
     const subject='Portpass Bug Report';
     const body='Hello Portpass Developer,\n\nI am having the following issue on your site...\n\n[Please describe your issue/missing feature/mistake in as much detail as you can here]\n\nThanks!';
     link.id='bug-report-link';
-    link.textContent='Found a problem?';
+    link.textContent='Found a problem? Tell us ↗';
     link.href=`mailto:contact@erik-kunz.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     nav.appendChild(link);
   }
