@@ -190,6 +190,47 @@ $('#show-more').onclick=()=>{limit+=24;renderDestinations();};
 $('#show-all').onclick=()=>{limit=Infinity;renderDestinations();};
 $('#explore-other-mode').onclick=()=>setMode(mode === 'live' ? 'visit' : 'live');
 $('#sources-button').onclick=$('#coverage-button').onclick=()=>$('#sources-dialog').showModal();
+{
+  const header=$('.topbar'),button=$('#header-menu-button'),menu=$('#header-menu'),search=$('.seo-guide-search'),compact=matchMedia('(max-width:720px)');
+  const close=()=>{menu.hidden=true;button.setAttribute('aria-expanded','false');};
+  const placeSearch=()=>{
+    if(compact.matches) menu.prepend(search);
+    else header.insertBefore(search,button);
+    close();
+  };
+  placeSearch();
+  compact.addEventListener('change',placeSearch);
+  button.onclick=()=>{
+    const open=menu.hidden;
+    menu.hidden=!open;
+    button.setAttribute('aria-expanded',String(open));
+    if(open&&compact.matches) search.querySelector('input').focus();
+  };
+  document.addEventListener('click',event=>{if(!event.target.closest('.topbar'))close();});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape')close();});
+}
+{
+  const input=$('#seo-search'),results=$('#seo-search-results');
+  if(input&&results){
+    let guides=[];
+    const close=()=>{results.hidden=true;input.setAttribute('aria-expanded','false');};
+    const show=()=>{
+      const aliases={german:'germany',swiss:'switzerland',british:'united kingdom',indian:'india'};
+      const terms=input.value.trim().toLowerCase().split(/\s+/).filter(Boolean).map(term=>aliases[term]||term);
+      if(!terms.length||!guides.length)return close();
+      const matches=guides.filter(guide=>terms.every(term=>(guide.title+' '+guide.detail).toLowerCase().includes(term))).slice(0,6);
+      results.replaceChildren();
+      if(matches.length){for(const guide of matches){const link=document.createElement('a'),detail=document.createElement('small');link.href=guide.url;link.role='option';link.textContent=guide.title;detail.textContent=guide.detail;link.append(detail);results.append(link);}}
+      else {const empty=document.createElement('p');empty.textContent='No guide found. Try a citizenship or destination.';results.append(empty);}
+      results.hidden=false;input.setAttribute('aria-expanded','true');
+    };
+    fetch('seo-search.json').then(response=>response.ok?response.json():[]).then(data=>{guides=Array.isArray(data)?data:[];}).catch(()=>{});
+    input.addEventListener('input',show);
+    input.closest('form').addEventListener('submit',event=>{event.preventDefault();const first=results.querySelector('a');if(first)location.href=first.href;});
+    document.addEventListener('click',event=>{if(!event.target.closest('.seo-guide-search'))close();});
+    input.addEventListener('keydown',event=>{if(event.key==='Escape')close();});
+  }
+}
 let exportFile, exportUrl, exportGeneration = 0;
 function clearMapExport() {
   exportGeneration++;

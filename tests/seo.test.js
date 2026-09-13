@@ -24,6 +24,8 @@ try {
  for(const file of [germany,germanySwiss,proof])assert.ok(fs.existsSync(file),file);
  assert.match(fs.readFileSync(germanySwiss,'utf8'),/https:\/\/portpass\.world\/passport\/germany\/switzerland\//);
  const sitemap=fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');
+ assert.match(fs.readFileSync(path.join(root,'seo-search.json'),'utf8'),/German citizens visit or live in Switzerland/);
+ assert.match(sitemap,/<loc>https:\/\/portpass\.world\/<\/loc>/);
  assert.match(sitemap,/https:\/\/portpass\.world\/passport\/germany\//);
  assert.match(sitemap,/germany-residence-permit\/albania/);
  console.log('SEO generation passed: engine-backed overview, distinct visit/live, compound permit route, filtering and sitemap.');
