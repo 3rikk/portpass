@@ -53,5 +53,18 @@
     const profile=parse(JSON.stringify({format:'portpass',version:1,name:name.trim(),documents}),countries);
     return JSON.stringify(profile,null,2)+'\n';
   }
+
+  // BOT destinations are separate immigration jurisdictions. In live mode, do not
+  // manufacture a generic eligibility route merely because the destination is a BOT.
+  // Keep explicit local status, held permits and any specific mobility rules intact.
+  const evaluate=root.PortpassRules.evaluate;
+  root.PortpassRules.evaluate=(destination,documents,mode,matrix,date)=>{
+    const result=evaluate(destination,documents,mode,matrix,date);
+    if(mode!=='live' || !root.PortpassRules.BOTC_TERRITORIES.includes(destination))return result;
+    const routes=result.routes.filter(route=>route.title!=='Territory residence approval');
+    routes.sort((a,b)=>root.PortpassRules.categories[b.category].rank-root.PortpassRules.categories[a.category].rank || (b.days||0)-(a.days||0));
+    return {category:routes[0]?.category||'unknown',best:routes[0],routes};
+  };
+
   root.PortpassProfile={parse,stringify,filename,MAX_BYTES};
 })(globalThis);
