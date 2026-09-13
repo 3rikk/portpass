@@ -61,7 +61,14 @@ html:root[data-palette] .theme-nudge.is-closing{opacity:0;transform:translateY(-
 html:root[data-palette] .theme-nudge-close{display:grid;place-items:center;width:28px;height:28px;min-width:28px;margin:-3px -2px -3px 1px;border-radius:7px;color:var(--muted);font-size:17px;line-height:1}
 html:root[data-palette] .theme-nudge-close:hover{background:var(--palette-soft-2);color:var(--ink)}
 html:root[data-palette] .theme-nudge-close:focus-visible{outline:2px solid var(--green);outline-offset:1px}
-@media(max-width:480px){html:root[data-palette] .theme-nudge{max-width:210px}}
+html:root[data-palette] .alpha-site-button{font:inherit;color:inherit;text-decoration:underline;text-underline-offset:3px;padding:0}
+html:root[data-palette] .alpha-warning-copy a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+html:root[data-palette] .alpha-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}
+html:root[data-palette] .alpha-actions button{padding:13px;border-radius:7px;font-size:12px}
+html:root[data-palette] .alpha-cancel{background:var(--palette-soft-3);color:var(--ink);border:1px solid var(--line)}
+html:root[data-palette] .alpha-continue{background:var(--palette-soft);color:var(--green);border:1px solid var(--palette-border);font-weight:600}
+html:root[data-theme="dark"][data-palette] .alpha-continue{color:var(--ink)}
+@media(max-width:480px){html:root[data-palette] .theme-nudge{max-width:210px}html:root[data-palette] .alpha-actions{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){html:root[data-palette] .palette-swatch,html:root[data-palette] .theme-nudge{transition:none}}
 `;
   document.head.appendChild(style);
@@ -133,6 +140,25 @@ html:root[data-palette] .theme-nudge-close:focus-visible{outline:2px solid var(-
     position();requestAnimationFrame(()=>bubble.classList.add('is-visible'));
     timer=setTimeout(remove,30000);
   }
+  function initAlphaWarning(){
+    if(!document.querySelector('#share-map')||document.querySelector('#alpha-site-button'))return;
+    const footerLinks=document.querySelector('footer .footer-links');
+    if(!footerLinks)return;
+    const button=document.createElement('button');
+    button.id='alpha-site-button';button.type='button';button.className='alpha-site-button';button.textContent='View alpha branch ↗';
+    footerLinks.appendChild(button);
+
+    const dialog=document.createElement('dialog');
+    dialog.id='alpha-warning-dialog';dialog.setAttribute('aria-labelledby','alpha-warning-title');
+    dialog.innerHTML='<div class="dialog-heading"><div><div class="eyebrow">WARNING</div><h2 id="alpha-warning-title">Alpha site</h2></div><button type="button" class="close" aria-label="Close">×</button></div><p class="alpha-warning-copy">This is an advanced option. The alpha version of the site may have bugs. Check <a href="https://github.com/3rikk/portpass/tree/alpha" target="_blank" rel="noopener">https://github.com/3rikk/portpass/tree/alpha</a> to see what\'s new.</p><div class="alpha-actions"><button type="button" class="alpha-cancel">Cancel</button><button type="button" class="alpha-continue">Continue to alpha site</button></div>';
+    document.body.appendChild(dialog);
+    const close=()=>dialog.close();
+    button.addEventListener('click',()=>dialog.showModal());
+    dialog.querySelector('.close').addEventListener('click',close);
+    dialog.querySelector('.alpha-cancel').addEventListener('click',close);
+    dialog.querySelector('.alpha-continue').addEventListener('click',()=>{location.href='https://alpha.portpass.world/';});
+    dialog.addEventListener('click',event=>{if(event.target===dialog){const rect=dialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)dialog.close();}});
+  }
 
   apply();
   system.addEventListener('change',apply);
@@ -142,7 +168,7 @@ html:root[data-palette] .theme-nudge-close:focus-visible{outline:2px solid var(-
     if(event.key===themeKey||event.key===paletteKey||event.key===null)apply();
   });
   document.addEventListener('DOMContentLoaded',()=>{
-    buildPalettePicker();apply();initThemeNudge();
+    buildPalettePicker();apply();initThemeNudge();initAlphaWarning();
     const select=document.querySelector('#theme-select');
     if(select)select.addEventListener('change',event=>{preference=validTheme(event.target.value);try{localStorage.setItem(themeKey,preference);}catch{}apply();});
   });
