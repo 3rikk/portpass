@@ -196,6 +196,17 @@ html:root[data-palette] .export-theme-controls>.export-palette-picker{position:a
     badge.textContent=hostname==='alpha.portpass.world'?'ALPHA':'BETA';
     badge.setAttribute('aria-label',badge.textContent==='ALPHA'?'Alpha environment':'Beta environment');
   }
+  function initBugReport(){
+    const nav=document.querySelector('#header-menu nav');
+    if(!nav||document.querySelector('#bug-report-link'))return;
+    const link=document.createElement('a');
+    const subject='Portpass Bug Report';
+    const body='Hello Portpass Developer,\n\nI am having the following issue on your site...\n\n[Please describe your issue/missing feature/mistake in as much detail as you can here]\n\nThanks!';
+    link.id='bug-report-link';
+    link.textContent='Found a problem?';
+    link.href=`mailto:contact@erik-kunz.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    nav.appendChild(link);
+  }
 
   apply();
   system.addEventListener('change',apply);
@@ -205,7 +216,7 @@ html:root[data-palette] .export-theme-controls>.export-palette-picker{position:a
     if(event.key===themeKey||event.key===paletteKey||event.key===null)apply();
   });
   document.addEventListener('DOMContentLoaded',()=>{
-    buildPalettePicker();apply();initEnvironmentBadge();initThemeNudge();initAlphaWarning();
+    buildPalettePicker();apply();initEnvironmentBadge();initThemeNudge();initAlphaWarning();initBugReport();
     const select=document.querySelector('#theme-select');
     if(select)select.addEventListener('change',event=>{preference=validTheme(event.target.value);try{localStorage.setItem(themeKey,preference);}catch{}apply();});
   });
