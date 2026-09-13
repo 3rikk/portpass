@@ -14,6 +14,8 @@
     ·
     <a href="#features">Features</a>
     ·
+    <a href="#appearance-and-sharing">Appearance & sharing</a>
+    ·
     <a href="#sources-and-limitations">Sources</a>
     ·
     <a href="#cloudflare-deployment">Deployment</a>
@@ -34,13 +36,36 @@
 - Multiple passports, residence permits and visitor visas, linked to a passport, with optional expiry dates.
 - Interactive pan/zoom world map, searchable country list and Visit/Live modes.
 - Show all destinations matching the current search and filter, or load more in batches.
-- Automatic light and dark appearance matching the system, including the map and dialogs.
-- Share map previews a JPEG with your travel wallet, current Visit/Live counters, a grid-free world map, and Portpass branding. Download it or use native file sharing where supported. Images are generated locally in the browser.
+- System, Light and Dark appearance modes plus six accent palettes. Rose is the default; Green, Amber, Violet, Teal and Slate are available from the header menu.
+- Share map previews a JPEG with your travel wallet, current Visit/Live counters, a grid-free world map, and Portpass branding. The first image follows the active site theme, while export-only theme controls can regenerate it without changing the website theme. Download it or use native file sharing where supported. Images are generated locally in the browser.
 - Best available route plus all assessed alternatives, conditions and provenance.
 - Browser-local wallet. No scans or document numbers; no third-party runtime requests.
 - Empty first-run state. Add a passport to begin. Expired documents and documents without an active linked passport are excluded.
+- Hostname-aware Stable and Alpha environments. The same code can safely render different environment labels, footer destinations and indexing behaviour on `portpass.world` and `alpha.portpass.world`.
 
 <img width="1505" height="856" alt="Portpass app screenshot" src="https://github.com/user-attachments/assets/023d88b6-12f8-40a4-843a-04a8a8615386" />
+
+## Appearance and sharing
+
+### Site themes
+
+`theme.js` owns the browser-local appearance preferences. The Light/Dark selector stores `portpass-theme`; the accent picker stores `portpass-palette`. Both are local device preferences and are not included in exported `.portpass` profiles.
+
+The available accent palettes are **Rose** (default), **Green**, **Amber**, **Violet**, **Teal** and **Slate**. The palette controls the main surfaces, map background, highlighted cards, controls, dialogs and generated guide styling. Keyboard focus rings also use the active accent token rather than a fixed colour, so focus styling follows the currently selected palette in both light and dark modes.
+
+System remains the default colour-mode preference. The selected appearance is applied to the main app, legal/error pages and generated guide pages. Generated guide links keep the surrounding text colour and use an underline as the link cue rather than falling back to browser-default blue/purple colours.
+
+A one-time **New: Custom Themes!** nudge is eligible to appear on the second distinct homepage session. Session storage prevents a reload from counting as another visit; local storage records the visit count and whether the nudge has already appeared. It disappears after 30 seconds, on dismissal, or when the menu is opened. Clicking the nudge itself opens the menu. This tracking is browser-local and contains no wallet data.
+
+### Map image sharing
+
+`map-export.js` draws the exported JPEG directly from the map/rules data on a local canvas. It does not use a screenshot service, DOM capture service or remote image renderer.
+
+The initial JPEG inherits the website's currently resolved Light/Dark mode and accent palette. After it is generated, the share dialog exposes a separate **Image theme** control with Light/Dark and all six accent colours. These controls are export-only: they regenerate the current JPEG automatically, update the download/share file, and do not write `portpass-theme`, `portpass-palette` or the document's active theme attributes.
+
+The share dialog keeps Download JPEG and native Share actions beside the close control and displays the generated JPEG inside a bounded image frame. The preview is constrained to the available viewport so its intrinsic dimensions cannot enlarge the modal or overflow the frame. On smaller screens the controls stack as needed.
+
+All export state is temporary browser state. The generated JPEG may contain the user's wallet labels and current Visit/Live results, so anything visible in the image is visible to whoever receives the file. Nothing in the JPEG generation flow is uploaded to Portpass.
 
 ## Sources and limitations
 
@@ -81,14 +106,27 @@ Not yet covered: most third-country document exemptions, other family-member rig
 
 Review upstream timestamp and changes before replacing the passport JSON. Preserve its license. Update the displayed snapshot date in `index.html` and `app.js`. Add rule regression cases in `tests/rules.test.js` when extending `rules.js`. Keep missing information as `unknown`. Do not treat third-party scraped data as guaranteed current or complete.
 
+The static 404 page uses root-relative site assets (`/style.css`, `/theme.js`, `/icon.svg`/favicon assets and `/` navigation) because Cloudflare's `404-page` handling serves the error document while retaining the missing URL in the address bar. Relative assets would otherwise resolve below the nonexistent path and leave the page unstyled.
+
 Tests: `node tests/rules.test.js` from this directory.
 
 Browser checks: install Playwright in your development environment, start the server above, then run `node tests/browser.cjs`. Run `node tests/map-export.cjs` for JPEG download and sharing checks. Set `PORTPASS_URL` to test another URL. Screenshots are written to `/tmp/portpass-desktop.png` and `/tmp/portpass-mobile.png`.
 
+Run `npm test` for the full rule, timing, profile, SEO, appearance and map-export regression suite. Test files document important boundaries such as BOTC jurisdiction handling, hostname-aware environment labels, export-only theme changes and generated SEO theming.
+
 ## Cloudflare deployment
 
-This is a no-build static site and can be deployed either as a Workers Static
-Assets application or as a Cloudflare Pages project.
+This is a static site with a deterministic SEO build step and can be deployed either as a Workers Static Assets application or as a Cloudflare Pages project.
+
+### Stable and Alpha environments
+
+The production site is `https://portpass.world/`; the experimental environment is `https://alpha.portpass.world/`. Environment-specific UI is determined by `location.hostname`, not by hardcoded branch text. This allows the same implementation to be promoted from `alpha` to `main` without making the production hostname behave like Alpha.
+
+On `alpha.portpass.world`, the header environment badge reads **ALPHA**. On other hostnames, including `portpass.world`, it reads **BETA**. The footer switch is also hostname-aware: Stable offers **View alpha branch** and shows a warning before navigating to Alpha; Alpha offers **View stable website** and shows a confirmation before returning to production. The Alpha → Stable confirmation includes a visible 10-second circular countdown and redirects automatically at zero unless cancelled. Clicking Continue redirects immediately.
+
+Alpha indexing protection is likewise hostname-aware. The build post-processor injects a small guard into the homepage, generated guides, 404 and Impressum. Only when the runtime hostname is exactly `alpha.portpass.world` does it create/update `<meta name="robots" content="noindex">`. On `portpass.world` the guard exits without changing robots metadata, so the same code can exist in `main` without noindexing production.
+
+Do **not** add a blanket `Disallow` for the Alpha hostname to the shared `robots.txt` as a substitute for this guard. Search engines need to be able to fetch the page to observe its `noindex` directive. The public production crawler policy and sitemap remain unchanged.
 
 ### Programmatic SEO
 
@@ -102,6 +140,8 @@ This produces the controlled guide corpus in `passport/` and `travel/`, plus
 `sitemap.xml` and `robots.txt`. The deploy commands run this step automatically.
 The generated files are intentionally ignored by Git and included in the
 Cloudflare asset upload through `.assetsignore`.
+
+The build post-processor also applies the shared theme script/styles, Google-compatible favicon markup and the hostname-aware Alpha indexing guard to generated/static HTML. Browser favicons retain the SVG icon while a square 96×96 PNG is declared for search-engine compatibility. Keep `/favicon.png` in the Cloudflare asset allowlist.
 
 The generated crawler policy allows normal search engines and AI crawlers through
 `User-agent: *`, with explicit allowances for `OAI-SearchBot` and `GPTBot`, and
@@ -160,20 +200,15 @@ Blank allowances are explicitly labelled as assumptions: the Schengen maximum (9
 
 Schengen estimates combine logged short visits across all Schengen visas in the wallet, including expired visas and other linked passports. The user must confirm complete history before a remaining stay is shown. A shorter entered total allowance also applies. Old visits fall out of the rolling 180-day window; overlapping records count once. Add separate historical visas as needed. Unrecorded visits, single/multiple-entry restrictions, nationality-specific exceptions and residence-authorised periods require the user's own checks; these clocks do not verify legal entitlement.
 
-Run `npm test` for rule and visa-calendar checks. `tests/visa-browser.js` provides browser integration checks (call `checkVisaClocks()` on a loaded local site with a disposable browser profile; it replaces that profile's wallet).
-
 Citizenship without a passport is a separate wallet type. It adds a residence result for that country in the Live tab only. It never substitutes for a passport, links a visa/permit, or adds passport travel or treaty routes abroad.
 
 **Advanced** below the map downloads a readable, indented JSON file with a `.portpass` extension. The optional name determines the filename (default `profile.portpass`). Version 1 contains `format: "portpass"`, `version: 1`, `name`, and `documents`, including visa timing and history. Import reads the file locally, validates it, and previews the entry count before the user replaces the current wallet. Invalid files leave the wallet untouched. Save the current profile first to keep it. Profiles are plain text, not encrypted; files are never uploaded to Portpass.
-
-The top-right theme selector offers System (default), Light and Dark. The override is stored locally as `portpass-theme`, applies to the main page and Impressum, and controls the palette used for new map images. It is a device preference, separate from exported wallet profiles.
 
 `tests/entry-browser.js` checks the new document fields, saved profiles, Greenland map/list, TTTA and China in a disposable browser profile. Run `checkEntryRules()` on the loaded local site. Third-country exemptions use the destination’s stay conditions, not the issuing visa’s stay clock.
 
 BOTC regression checks: `tests/botc.test.js` is included in `npm test`; run `checkBotc()` from `tests/botc-browser.js` in a disposable browser profile for form, edit and profile checks.
 
 `tests/association.test.js` covers host-country and nationality boundaries, qualifying stages, inactive documents and profile validation. `checkAssociation()` in `tests/association-browser.js` checks the residence form, confirmation resets and saved profiles.
-
 
 **Settlement blocs**, directly above Advanced, opens a separate public membership map. Its 24 colour-key entries cover the 21 overview blocs/initiatives plus enhanced CARICOM, EU–Switzerland and EFTA. Click a key entry to isolate a group, or Show all blocs to restore the overview. Overlapping memberships use continuous diagonal stripes containing every applicable colour; small states and territories omitted from the base map have markers. Country details explain the actual rights and conditions, including bilateral and proposed arrangements. Returning to the personal map preserves the wallet, mode, search and zoom.
 
