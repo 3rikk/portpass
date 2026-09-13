@@ -24,9 +24,26 @@ try {
  for(const file of [germany,germanySwiss,proof])assert.ok(fs.existsSync(file),file);
  assert.match(fs.readFileSync(germanySwiss,'utf8'),/https:\/\/portpass\.world\/passport\/germany\/switzerland\//);
  const sitemap=fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');
- assert.match(fs.readFileSync(path.join(root,'seo-search.json'),'utf8'),/German citizens visit or live in Switzerland/);
+ const guides=JSON.parse(fs.readFileSync(path.join(root,'seo-search.json'),'utf8'));
+ const swissGuide=guides.find(guide=>guide.url==='/passport/germany/switzerland/');
+ assert.ok(swissGuide,'Germany–Switzerland guide is searchable');
+ assert.match(swissGuide.title,/citizens visit or live in Switzerland/);
  assert.match(sitemap,/<loc>https:\/\/portpass\.world\/<\/loc>/);
  assert.match(sitemap,/https:\/\/portpass\.world\/passport\/germany\//);
  assert.match(sitemap,/germany-residence-permit\/albania/);
+ const robots=fs.readFileSync(path.join(root,'robots.txt'),'utf8');
+ for(const agent of ['*','OAI-SearchBot','GPTBot']) {
+  assert.ok(robots.split('\n\n').some(group=>group.split('\n').includes('User-agent: '+agent)&&group.split('\n').includes('Allow: /')),agent+' can crawl public pages');
+ }
+ assert.doesNotMatch(robots,/^Disallow:\s*\S/m);
+ assert.match(robots,/^Sitemap: https:\/\/portpass\.world\/sitemap\.xml$/m);
+ for(const url of output.urls) {
+  assert.ok(url==='/'||/^\/(passport|travel)\/[a-z0-9/-]*$/.test(url),'only public reference URLs enter the sitemap: '+url);
+  if(url==='/')continue;
+  const html=fs.readFileSync(path.join(root,url,'index.html'),'utf8');
+  assert.ok(html.includes('<link rel="canonical" href="'+SEO.CONFIG.baseUrl+url+'">'));
+  assert.match(html,/<meta name="robots" content="index,follow">/);
+ }
+
  console.log('SEO generation passed: engine-backed overview, distinct visit/live, compound permit route, filtering and sitemap.');
 } finally {fs.rmSync(root,{recursive:true,force:true});}

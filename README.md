@@ -78,6 +78,19 @@ This produces the controlled guide corpus in `passport/` and `travel/`, plus
 The generated files are intentionally ignored by Git and included in the
 Cloudflare asset upload through `.assetsignore`.
 
+The generated crawler policy allows normal search engines and AI crawlers through
+`User-agent: *`, with explicit allowances for `OAI-SearchBot` and `GPTBot`, and
+advertises `https://portpass.world/sitemap.xml`. Wallets and imported profiles stay
+in the browser; only public reference guides enter the sitemap. Do not publish
+personal wallet results as indexable pages. If server-hosted personal results are
+introduced, exclude them from the sitemap and serve `noindex` (robots.txt alone
+does not prevent indexing).
+
+Neither Wrangler configuration sets bot access policies. Separately check the
+Cloudflare zone's AI crawler blocking, managed robots.txt and WAF/challenge rules
+if crawlers cannot reach public pages; these dashboard settings can override the
+site policy. Keep unrelated security protections enabled.
+
 Install the local Cloudflare CLI and authenticate once:
 
 ```sh
