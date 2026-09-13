@@ -2,11 +2,11 @@
   "name": "portpass",
   "private": true,
   "scripts": {
-    "build:seo": "node -r ./visa-time.js -r ./rules.js -r ./profile.js scripts/generate-seo.js",
+    "build:seo": "node -r ./visa-time.js -r ./rules.js -r ./profile.js scripts/generate-seo.js && node scripts/apply-seo-theme.js",
     "dev": "wrangler dev --config wrangler.jsonc",
     "deploy:worker": "npm run build:seo && wrangler deploy --config wrangler.jsonc",
     "deploy:pages": "npm run build:seo && wrangler pages deploy . --project-name=portpass --config wrangler.pages.jsonc",
-    "test": "node tests/rules.test.js && node tests/visa-time.test.js && node tests/profile.test.js && node tests/botc.test.js && node tests/association.test.js && node tests/settlement.test.js && node tests/seo.test.js"
+    "test": "node tests/rules.test.js && node tests/visa-time.test.js && node tests/profile.test.js && node tests/botc.test.js && node tests/association.test.js && node tests/settlement.test.js && node tests/seo.test.js && node tests/seo-theme.test.js"
   },
   "devDependencies": {
     "wrangler": "latest"
