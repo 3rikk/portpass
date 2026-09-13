@@ -136,7 +136,7 @@ function setMode(value) {mode=value;filter='all';limit=12;document.querySelector
 document.addEventListener('click',e=>{
   const close=e.target.closest('[data-close]');if(close)$('#'+close.dataset.close).close();
   const remove=e.target.closest('[data-remove]');if(remove){docs=docs.filter(d=>d.id!==remove.dataset.remove);save();render();}
-  const country=e.target.closest('[data-country]');if(country)showCountry(country.dataset.country);
+  const country=e.target.closest('#destination-list .destination-card[data-country]');if(country)showCountry(country.dataset.country);
   const f=e.target.closest('[data-filter]');if(f){filter=f.dataset.filter;limit=12;render();}
   const edit=e.target.closest('[data-edit]');if(edit)openDocumentForm(edit.dataset.edit);
   const focus=e.target.closest('[data-visa-focus]');if(focus){focusedVisaId=focusedVisaId===focus.dataset.visaFocus?null:focus.dataset.visaFocus;renderVisaClocks();}
@@ -260,6 +260,7 @@ async function init(){
     docs=docs.filter(d=>countries.includes(d.country));
     geo.features.forEach(f=>{const p=f.properties;p.code=p.ISO_A2_EH!=='-99'?p.ISO_A2_EH:p.ISO_A2;p.label=/^[A-Z]{2}$/.test(p.code)?name(p.code):p.NAME;});
     drawMap();render();$('#share-map').disabled=false;
+    PortpassBlocMap.init({features:geo.features, name, flag, escapeHTML});
   }catch(error){$('#stats').innerHTML='<p class="empty">We couldn’t load the map data. Serve this folder over HTTP and refresh to try again.</p>';$('#map-subtitle').textContent='Data unavailable';console.error(error);}
 }
 let lastVisaDate=R.today();

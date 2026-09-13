@@ -64,7 +64,7 @@ const assert=require('node:assert/strict');
  assert.match(await page.locator('#country-detail').innerText(),/quota/);
  await page.keyboard.press('Escape');
  const residenceCounts=await page.locator('.stat strong').allTextContents();
- assert.equal(residenceCounts.reduce((sum,value)=>sum+Number(value),0),199);
+ assert.equal(residenceCounts.reduce((sum,value)=>sum+Number(value),0),total);
  await page.locator('.remove').click();await page.click('[data-mode=visit]');
  await add('passport','UA');await page.fill('#search','France');await page.click('[data-country=FR]');
  assert.match(await page.locator('#country-detail').innerText(),/passport check needed/);

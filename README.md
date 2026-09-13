@@ -122,3 +122,8 @@ The top-right theme selector offers System (default), Light and Dark. The overri
 BOTC regression checks: `tests/botc.test.js` is included in `npm test`; run `checkBotc()` from `tests/botc-browser.js` in a disposable browser profile for form, edit and profile checks.
 
 `tests/association.test.js` covers host-country and nationality boundaries, qualifying stages, inactive documents and profile validation. `checkAssociation()` in `tests/association-browser.js` checks the residence form, confirmation resets and saved profiles.
+
+
+**Settlement blocs**, directly above Advanced, opens a separate public membership map. Its 24 colour-key entries cover the 21 overview blocs/initiatives plus enhanced CARICOM, EU–Switzerland and EFTA. Click a key entry to isolate a group, or Show all blocs to restore the overview. Overlapping memberships use continuous diagonal stripes containing every applicable colour; small states and territories omitted from the base map have markers. Country details explain the actual rights and conditions, including bilateral and proposed arrangements. Returning to the personal map preserves the wallet, mode, search and zoom.
+
+`bloc-map.js` builds this view from the supported rules, independently of wallet evaluations. `checkBlocMap()` in `tests/bloc-map-browser.js` checks all member geometries/markers, overlap colours, key filtering, keyboard interaction, desktop/mobile layout, themes and preservation of personal state in a disposable browser profile.

@@ -3,10 +3,10 @@
   const EU = 'AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE'.split(' ');
   const EEA = [...EU, 'IS', 'LI', 'NO'];
   const EFTA = ['IS', 'LI', 'NO', 'CH'];
-  const REVIEWED = '2026-09-12';
-  const SCHENGEN = 'AT BE BG HR CZ DK EE FI FR DE GR HU IT LV LT LU MT NL PL PT RO SK SI ES SE IS LI NO CH'.split(' ');
+  const REVIEWED = '2026-09-13';
+  const SCHENGEN = 'AT BE BG HR CZ DK EE FI FR DE GR HU IT LV LT LU MT NL PL PT RO SK SI ES SE IS LI NO CH AX'.split(' ');
   const BOTC_TERRITORIES = ['GI','FK','BM','KY'];
-  const EXTRA_DESTINATIONS = ['GL',...BOTC_TERRITORIES];
+  const EXTRA_DESTINATIONS = ['GL','FO','AX','GG','JE','IM',...BOTC_TERRITORIES];
   const passportCodes = matrix => [...new Set([...Object.keys(matrix),...BOTC_TERRITORIES])];
   const NORDIC = ['DK','FI','IS','NO','SE'];
   const destinationCodes = matrix => [...new Set([...Object.keys(matrix), ...EXTRA_DESTINATIONS])];
@@ -81,6 +81,81 @@
     visaWaiver:'EU visa regulation · Annex II', visaPolicy:'European Commission · visa policy',
     nauru:'Council of the EU · visa agreements', brazil:'European Commission · border crossing'
   }).map(([key,label]) => [sources[key], label]));
+  // Settlement coverage is separate from tourist entry. Omitted visitCategory
+  // means this scheme must not override the ordinary passport entry assessment.
+  const SETTLEMENT_BLOCS = [
+    {id:'mercosur', title:'MERCOSUR Residence Agreement', members:'AR BO BR CL CO EC PE PY UY', category:'conditional',
+      source:'https://www.mercosur.int/documento/acuerdo-residencia-nacionales-estados-partes-mercosur',
+      conditions:'Apply for a two-year residence permit based on qualifying nationality. Identity, criminal-record and other required documents, legalisation and fees apply. Naturalised applicants may need five years of citizenship. Permanent residence requires a separate timely application and evidence of lawful means of support. This application route is not an already-held residence permit; Venezuela is not included.'},
+    {id:'can', title:'Andean Community (CAN) residence', members:'BO CO EC PE', category:'conditional',
+      source:'https://www.comunidadandina.org/notas-de-prensa/hoy-entra-en-vigencia-el-estatuto-migratorio-andino/',
+      conditions:'Decision 878 provides an application route to temporary Andean residence for up to two years and subsequent permanent residence. Supply accepted identity and criminal-record documents and meet the destination’s application requirements. Permanent residence has its own timing and livelihood requirements; nationality alone is not a granted permit.'},
+    {id:'csme', title:'CARICOM Single Market and Economy (CSME)', members:'AG BB BZ DM GD GY JM KN LC VC SR TT', category:'conditional',
+      source:'https://caricom.org/csme-resources/',
+      conditions:'Qualifying skilled nationals need a CARICOM Skills Certificate and receiving-country verification. Separate establishment and service-provider routes require the relevant registration and evidence. Nationality alone does not establish a qualifying category or unrestricted settlement. Check the current recognised skills categories and implementation in the receiving state.'},
+    {id:'caricomEnhanced', title:'CARICOM enhanced free movement', members:'BB BZ DM VC', category:'live', visitCategory:'free', since:'2025-10-01',
+      source:'https://www.foreign.gov.bb/faqs-on-enhanced-cooperation-in-movement-of-caricom-nationals/',
+      conditions:'From 1 October 2025, nationals of these four participating states may enter, live and work in one another without a work permit or Skills Certificate. Present proof of qualifying nationality for the indefinite-stay endorsement and complete local registration. Public-security and admissibility conditions still apply.'},
+    {id:'gcc', title:'Gulf Cooperation Council (GCC)', members:'BH KW OM QA SA AE', category:'live', visitCategory:'free',
+      source:'https://www.gcc-sg.org/en/MediaCenter/DigitalLibrary/Documents/1274592562.pdf',
+      conditions:'GCC citizenship supports movement, residence and access to employment under the common-market arrangements. Carry accepted proof of citizenship and complete local registration. Sector, professional and national restrictions still apply. A GCC residence permit held by a non-citizen does not confer these rights.'},
+    {id:'nordic', title:'Nordic Passport Union / Nordic residence', members:'DK FI IS NO SE', destinations:'DK FI IS NO SE FO AX', category:'live', visitCategory:'free',
+      source:'https://www.norden.org/en/info-norden/work-and-residence-permits-faroe-islands',
+      conditions:'Nordic citizens may live and work across the Nordic countries and in the Faroe Islands without a residence or work permit. Register a move where required and carry accepted identity documents. Åland has separate land-ownership and business rules. Record Danish citizenship for Greenland/Faroe Islands nationals and Finnish citizenship for Åland; these territories do not issue separate national citizenships.'},
+    {id:'benelux', title:'Benelux Union', members:'BE NL LU', category:'live',
+      source:'https://www.benelux.int/en/information-for-citizens/benelux-union/about-us/benelux-treaty/',
+      conditions:'Belgium, the Netherlands and Luxembourg form the Benelux Union. Their citizens also have EU free-movement rights, assessed separately here. Follow the applicable residence and registration procedures; this overlapping arrangement does not multiply a stay allowance.'},
+    {id:'cofaUS', title:'Compact of Free Association (CoFA) · United States', members:'FM MH PW', destinations:'US', category:'conditional', visitCategory:'conditional',
+      source:'https://www.uscis.gov/sites/default/files/document/fact-sheets/FactSheetVerifyFASCitizens.pdf',
+      conditions:'Eligible citizens of Micronesia, the Marshall Islands and Palau may be admitted to live, work and study in the US as Compact nonimmigrants without a visa. Citizenship acquisition and the applicable Compact eligibility rules must be checked, especially for naturalised citizens. A passport alone does not confirm these conditions. Admission is not a green card or US citizenship; retain proof of Compact admission.'},
+    {id:'cofaPacific', title:'Compact of Free Association (CoFA) · Pacific states', members:'US', destinations:'FM MH PW', category:'conditional',
+      source:'https://www.doi.gov/oia/compacts',
+      conditions:'The US has a separate Compact with each of Micronesia, the Marshall Islands and Palau. US citizens should check the destination’s residence, registration and employment rules before moving; visitor admission is not proof of unrestricted permanent settlement. These bilateral Compacts do not create automatic residence rights between the three Pacific states.'},
+    {id:'eaeu', title:'Eurasian Economic Union (EAEU) workers', members:'AM BY KZ KG RU', category:'conditional',
+      source:'https://eec.eaeunion.org/upload/iblock/9fc/ef4tm95rjpz5qimsd8iogeltvpnv9uwi/EAEU-10-Eng.pdf',
+      conditions:'Member-state citizens can work without a separate work permit under the EAEU labour framework. Residence for workers and qualifying family members is linked to an employment or services contract. Migration registration, qualifications and national procedures still apply. Citizenship alone does not establish indefinite residence without a qualifying activity.'},
+    {id:'indiaNepal', title:'India–Nepal Treaty of Peace and Friendship', members:'IN NP', category:'live', visitCategory:'free',
+      source:'https://www.mea.gov.in/Images/pdf/rti-samsher-9-11-140001.pdf',
+      conditions:'The 1950 treaty supports reciprocal movement, residence and economic activity for Indian and Nepalese citizens. Carry accepted proof of citizenship and check route-specific entry requirements, especially arrival from third countries. Regulated occupations, property transactions and national restrictions still have separate rules.'},
+    {id:'eac', title:'East African Community (EAC) Common Market', members:'BI CD KE RW SO SS TZ UG', category:'conditional',
+      source:'https://www.eac.int/working-in-east-africa',
+      conditions:'The Common Market provides worker and establishment routes and associated residence for qualifying family members. Check the destination’s work/residence permit, occupation and registration requirements; implementation differs, including for newer members DR Congo, South Sudan and Somalia. EAC membership alone does not establish an unconditional permanent residence permit.'},
+    {id:'oecs', title:'OECS Economic Union free movement', members:'AG DM GD KN LC VC', category:'live', visitCategory:'free',
+      source:'https://pressroom.oecs.int/oecs-continues-to-strengthen-the-free-movement-of-persons-regime',
+      conditions:'Citizens of the participating OECS protocol states can reside and work under the Economic Union free-movement regime without a Skills Certificate. Carry accepted proof of citizenship and obtain the appropriate entry endorsement. Check local procedures and service entitlements. Associate membership alone does not confer these rights.'},
+    {id:'ecowas', title:'ECOWAS residence and establishment', members:'BJ CV CI GM GH GN GW LR NG SN SL TG', category:'conditional',
+      source:'https://www.ecowas.int/press-statement-2/',
+      conditions:'ECOWAS protocols provide movement, residence and establishment routes, with national residence documentation and implementation requirements. Check the receiving state’s permit and employment procedures before moving. Burkina Faso, Mali and Niger withdrew in January 2025; they are not counted as current members.'},
+    {id:'ecowasTransition', title:'ECOWAS · withdrawn-state transitional arrangements', members:'BF ML NE', destinations:'BJ CV CI GM GH GN GW LR NG SN SL TG', category:'conditional',
+      source:'https://www.ecowas.int/press-statement-2/',
+      conditions:'ECOWAS instructed remaining members to continue recognising movement, residence and establishment for nationals of Burkina Faso, Mali and Niger until further notice after their January 2025 withdrawal. Confirm that transitional treatment and the destination’s documentation rules still apply. No reciprocal rule in the withdrawn states is inferred.'},
+    {id:'ca4', title:'Central America Four (CA-4) · residence requires approval', members:'SV GT HN NI', category:'conditional',
+      source:'https://inm.gob.hn/residencias.html',
+      conditions:'CA-4 border and visitor arrangements do not establish an automatic permanent residence or employment entitlement. Apply under the destination’s national residence or special-stay rules and check work permission. Easier border crossing is not a substitute for approved residence.'},
+    {id:'pacificAlliance', title:'Pacific Alliance · working-holiday mobility', members:'CL CO MX PE', category:'conditional',
+      source:'https://alianzapacifico.net/en/download/acuerdo-interinstitucional-de-la-alianza-del-pacifico-para-un-programa-de-vacaciones-y-trabajo/',
+      conditions:'The Alliance provides a working-holiday application framework. Age, nationality, funds, insurance, quotas and destination implementation must be checked. This is temporary mobility, not an unrestricted right to settle permanently; other work/residence routes need their own approval.'},
+    {id:'cplp', title:'Community of Portuguese Language Countries (CPLP)', members:'AO BR CV GQ GW MZ PT ST TL', category:'conditional',
+      source:'https://www.cplp.org/organizacao/mobilidade-circulacao-e-cidadania/',
+      conditions:'The CPLP Mobility Agreement allows participating states to implement facilitated visa and residence procedures. Eligibility, documentary requirements and implementation are destination-specific. Membership does not itself waive a visa or grant residence. Check the relevant consulate’s current CPLP application route.'},
+    {id:'cplpPortugal', title:'Portugal · CPLP residence application', members:'AO BR CV GQ GW MZ ST TL', destinations:'PT', category:'conditional',
+      source:'https://aima.gov.pt/pt/noticias/kgljg',
+      conditions:'AIMA’s current CPLP residence procedure requires a consular visa issued for this purpose before the residence application and biometric appointment. A CPLP passport alone does not establish lawful residence or visa-free entry. Check current consular and AIMA requirements.'},
+    {id:'asean', title:'ASEAN · professional mobility', members:'BN KH ID LA MY MM PH SG TH VN TL', category:'conditional',
+      source:'https://investasean.asean.org/asean-framework/mras/',
+      conditions:'ASEAN mutual-recognition arrangements can assist eligible professionals, subject to the host’s licensing, employment, visa and residence rules. They do not grant automatic settlement or a general work permit. Timor-Leste joined ASEAN in October 2025; verify its participation in the particular professional arrangement before applying.'},
+    {id:'apec', title:'APEC Business Travel Card (ABTC)', members:'AU BN CA CL CN HK ID JP MY MX NZ PE PH PG RU SG KR TW TH US VN', category:'unknown', visitCategory:'conditional',
+      source:'https://www.apec.org/groups/committee-on-trade-and-investment/business-mobility-group/abtc/faq',
+      conditions:'APEC offers business-travel facilitation, not settlement or employment rights. Short-business-visit benefits require a valid ABTC, matching passport and destination pre-clearance. US and Canadian participation provides expedited processing without a visa exemption. Check issuing-economy eligibility and current participation; no card or pre-clearance is inferred from nationality.'},
+    {id:'africanPassport', title:'African Union passport initiative · no general settlement right', members:'DZ AO BJ BW BF BI CV CM CF TD KM CG CD CI DJ EG GQ ER SZ ET GA GM GH GN GW KE LS LR LY MG MW ML MR MU MA MZ NA NE NG RW ST SN SC SL SO ZA SS SD TZ TG TN UG ZM ZW EH', category:'unknown',
+      source:'https://www.au.int/en/treaties/protocol-treaty-establishing-african-economic-community-relating-free-movement-persons',
+      conditions:'The African passport and continental free-movement initiative do not establish a general residence or work entitlement for ordinary national-passport holders. Use applicable national immigration routes or an implemented regional agreement. AU membership is not evidence that the continental protocol is implemented for this journey.'}
+  ].map(bloc => ({...bloc, members:bloc.members.split(' '), destinations:(bloc.destinations || bloc.members).split(' ')}));
+  for (const bloc of SETTLEMENT_BLOCS) sourceLabels[bloc.source] ||= bloc.title + ' · official source';
+  function settlementAgreements(origin, destination, date = today()) {
+    if (origin === destination) return [];
+    return SETTLEMENT_BLOCS.filter(bloc => bloc.members.includes(origin) && bloc.destinations.includes(destination) && (!bloc.since || date >= bloc.since));
+  }
   // Ordinary citizen passports only. Nauru's waiver is not yet applicable;
   // Vanuatu was removed. Do not infer reciprocal access outside Schengen.
   const VISA_WAIVER = 'AD AE AG AL AR AU BA BB BN BR BS CA CL CO CR DM FM GD GE GT HN IL JP KI KN KR LC MC MD ME MH MK MU MX MY NI NZ PA PE PW PY RS SB SC SG SM SV TL TO TT TV UA GB US UY VA VC VE WS HK MO TW XK'.split(' ');
@@ -100,6 +175,14 @@
     return null;
   }
   function movementAgreement(origin, destination) {
+    if (destination === 'AX') {
+      const agreement = movementAgreement(origin, 'FI');
+      return agreement ? {...agreement, conditions:agreement.conditions + ' Åland is part of Finland and the EU; local right of domicile, land acquisition and business licensing have separate requirements.'} : null;
+    }
+    if (['GB','IE'].includes(origin) && ['GG','JE','IM'].includes(destination)) return {
+      title:'Common Travel Area · Crown Dependencies', source:sources.cta,
+      conditions:'British and Irish citizens do not need immigration permission to enter or reside under the CTA. Local controls still apply: Jersey has housing and employment-status rules, Guernsey has population-management and housing permissions, and the Isle of Man may require a work permit unless exempt. Record British-citizen passports as United Kingdom, not a separate Crown Dependency nationality.'
+    };
     if (destination === 'GL' && NORDIC.includes(origin)) return {
       title:'Nordic citizens in Greenland', source:sources.greenland,
       conditions:'Nordic citizens may enter, reside and work in Greenland without a visa or residence permit. Carry accepted identity documents and check carrier requirements. Greenland is outside EU free movement and Schengen.'
@@ -178,6 +261,8 @@
     return valid.filter(d => ['passport','citizenship'].includes(d.type) || valid.some(p => p.type === 'passport' && p.country === d.passport));
   }
   function evaluate(destination, docs, mode, matrix, date = today()) {
+    // Åland shares Finland’s entry policy; retain an explicit territory override.
+    const passportRule = country => matrix[country]?.[destination] || (destination === 'AX' ? matrix[country]?.FI : undefined);
     const active = activeDocuments(docs, date), passports = active.filter(d => d.type === 'passport');
     const routes = [];
     const add = (category, document, title, conditions, source, days, substituted = false) => {
@@ -201,7 +286,7 @@
     }
     for (const p of passports) {
       const botc = BOTC_TERRITORIES.includes(p.country);
-      const restricted = matrix[p.country]?.[destination]?.status === 'no admission';
+      const restricted = passportRule(p.country)?.status === 'no admission';
       if (botc && p.country === destination && !restricted) {
         if (p.localStatus === true) {
           add('home', p, 'Documented local residence status', 'You declared local right of abode or unrestricted residence status in this territory. Carry proof of that status with your BOTC passport. This does not establish rights in the UK or another territory; work rights depend on your local status.', TERRITORY_RESIDENCE[destination].source);
@@ -247,16 +332,25 @@
           continue;
         }
       }
-      if (p.country === destination && !botc) {
+      if ((p.country === destination || (p.country === 'FI' && destination === 'AX')) && !botc) {
         add('home', p, 'Country of citizenship', 'Travel with the documents required by your country of citizenship. National rules and individual restrictions can still apply.','');
         continue;
       }
-      const agreement = matrix[p.country]?.[destination]?.status === 'no admission' ? null : movementAgreement(p.country, destination);
+      const settlements = restricted ? [] : settlementAgreements(p.country, destination, date);
+      for (const bloc of settlements) {
+        const processingOnly = bloc.id === 'apec' && (['US','CA'].includes(p.country) || ['US','CA'].includes(destination));
+        const category = mode === 'live' ? bloc.category : processingOnly ? 'unknown' : bloc.visitCategory;
+        if (category) add(category, p, bloc.title, bloc.conditions, bloc.source);
+      }
+      // Compact eligibility must not be silently confirmed by the older matrix.
+      if (mode === 'visit' && settlements.some(bloc => bloc.id === 'cofaUS')) continue;
+      const agreement = restricted ? null : movementAgreement(p.country, destination);
       if (agreement) {
         const category = mode === 'live' ? (agreement.quota ? 'conditional' : 'live') : (agreement.visitCategory || 'free');
         add(category, p, agreement.title, agreement.conditions, agreement.source);
         continue;
       }
+      if (mode === 'visit' && settlements.some(bloc => bloc.visitCategory === 'free')) continue;
       if (mode === 'live') {
         if (!restricted && p.country === 'TR' && (EU.includes(destination) || destination === 'GB')) {
           add('conditional', p, destination === 'GB' ? 'UK ECAA · existing holders only' : 'EU–Turkey association · qualifying history required', destination === 'GB'
@@ -274,18 +368,19 @@
           continue;
         }
       }
-      if (destination === 'GL' && matrix[p.country]?.GL?.status !== 'no admission') {
+      if (['GL','FO'].includes(destination) && !restricted) {
+        const territory = destination === 'GL' ? 'Greenland' : 'the Faroe Islands';
         const eligible = botc || [...EEA,'CH',...VISA_WAIVER].includes(p.country);
         const requirement = botc ? null : passportRequirement(p.country);
         const confirmed = !requirement || p[requirement.key] === true;
         const category = !eligible || (requirement && p[requirement.key] === false) ? 'required' : confirmed ? 'free' : 'conditional';
-        add(category, p, category === 'free' ? 'Greenland short-visit visa waiver' : 'Greenland entry requirements',
-          'Greenland is outside Schengen. Nationals exempt from a Danish visa may visit for up to 90 days; passport-specific waiver conditions still apply. Otherwise obtain a visa explicitly valid for Greenland. A Danish or Schengen visitor visa alone is insufficient. Check any transit visa needed for the journey.' + (requirement ? ' ' + requirement.detail : ''), sources.greenland, category === 'free' ? 90 : undefined);
+        add(category, p, category === 'free' ? `${territory} short-visit visa waiver` : `${territory} entry requirements`,
+          `${territory} is outside Schengen. Nationals exempt from a Danish visa may visit for up to 90 days; passport-specific waiver conditions still apply. Otherwise obtain a visa explicitly valid for ${territory}. A Danish or Schengen visitor visa alone is insufficient. Check any transit visa needed for the journey.` + (requirement ? ' ' + requirement.detail : ''), sources.greenland, category === 'free' ? 90 : undefined);
         continue;
       }
       // A source-backed waiver replaces the dataset baseline for this corridor,
       // but never silently removes a reported nationality-specific restriction.
-      if (SCHENGEN.includes(destination) && matrix[p.country]?.[destination]?.status !== 'no admission') {
+      if (SCHENGEN.includes(destination) && passportRule(p.country)?.status !== 'no admission') {
         if (p.country === 'VU' || p.country === 'NR') {
           add('required', p, 'Schengen visa required', p.country === 'VU'
             ? 'Vanuatu is no longer covered by the EU visa waiver. Obtain a visa unless a separately assessed document exemption applies.'
@@ -307,7 +402,7 @@
         }
       }
       if (botc && !restricted) continue;
-      const rule = matrix[p.country]?.[destination];
+      const rule = passportRule(p.country);
       if (!rule) continue;
       const category = {'visa free':'free','visa on arrival':'arrival','eta':'online','e-visa':'online','visa required':'required','no admission':'restricted'}[rule.status];
       if (!category) continue;
@@ -322,7 +417,7 @@
       add(category, p, rule.status === 'eta' ? 'Electronic travel authorisation' : categories[category].label, conditions, sources.passport, rule.days);
     }
     for (const d of active.filter(d => d.type !== 'passport')) {
-      const baseline = matrix[d.passport]?.[destination];
+      const baseline = passportRule(d.passport);
       if (baseline?.status === 'no admission') continue;
       if (mode === 'live' && d.country === destination) {
         const association = associationAssessment(d, active);
@@ -351,7 +446,7 @@
         }
         if (destination === 'RS' && ((visa && (schengenVisa || [...EU,'GB','US'].includes(d.country))) || (residence && [...SCHENGEN,...EU,'US'].includes(d.country)))) exemption('Third-country document exemption for Serbia', 'Up to 90 days during six months, within the validity of the qualifying visa or residence permit. National passports only; emergency and convention travel documents are excluded.', sources.serbia, 90);
         if (destination === 'ME' && (residence || visa) && (schengenVisa || [...SCHENGEN,'AU','JP','CA','NZ','IE','US','GB'].includes(d.country))) exemption('Third-country document exemption for Montenegro', 'Up to 30 days, never beyond the expiry of the qualifying visa or residence permit.', sources.montenegro, 30);
-        if (destination === 'GL' && residence && SCHENGEN.includes(d.country)) exemption('Schengen residence permit access to Greenland', 'Requires a valid residence permit allowing entry and residence in Denmark. Bring the physical residence card and passport. Greenland has a separate short-visit allowance; a Schengen visitor visa alone does not qualify.', sources.greenland, 90);
+        if (['GL','FO'].includes(destination) && residence && SCHENGEN.includes(d.country)) exemption('Schengen residence permit access to ' + (destination === 'GL' ? 'Greenland' : 'the Faroe Islands'), 'Requires a valid residence permit allowing entry and residence in Denmark. Bring the physical residence card and passport. This territory has a separate short-visit allowance; a Schengen visitor visa alone does not qualify.', sources.greenland, 90);
       }
       if (d.type === 'residence' && d.country === destination) {
         add('permit', d, 'Your residence permit', 'Based on the permit you entered. Residence, re-entry and work permissions depend on its category, validity and conditions. This is not an independent verification of your status.', '');
@@ -364,5 +459,5 @@
     routes.sort((a,b) => categories[b.category].rank-categories[a.category].rank || (b.days || 0)-(a.days || 0));
     return {category: routes[0]?.category || 'unknown', best: routes[0], routes};
   }
-  root.PortpassRules = { ASSOCIATION_ROUTES, associationOptions, validateAssociation, associationAssessment, BOTC_TERRITORIES, FALKLANDS_VISA_REQUIRED, passportCodes, EXTRA_DESTINATIONS, destinationCodes, EU, EEA, EFTA, SCHENGEN, REVIEWED, VISA_WAIVER, BIOMETRIC, sources, sourceLabels, categories, passportRequirement, movementAgreement, activeDocuments, evaluate, today };
+  root.PortpassRules = { SETTLEMENT_BLOCS, settlementAgreements, ASSOCIATION_ROUTES, associationOptions, validateAssociation, associationAssessment, BOTC_TERRITORIES, FALKLANDS_VISA_REQUIRED, passportCodes, EXTRA_DESTINATIONS, destinationCodes, EU, EEA, EFTA, SCHENGEN, REVIEWED, VISA_WAIVER, BIOMETRIC, sources, sourceLabels, categories, passportRequirement, movementAgreement, activeDocuments, evaluate, today };
 })(globalThis);

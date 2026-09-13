@@ -1,10 +1,10 @@
 # Agreement coverage
 
-Reviewed 2026-09-12. Rules assume ordinary citizen passports and assess visits separately from residence. Treaty-based residence remains subject to the conditions stated in the country detail. National admission restrictions still require individual checks.
+Reviewed 2026-09-13. Rules assume ordinary citizen passports and assess visits separately from residence. Treaty-based residence remains subject to the conditions stated in the country detail. National admission restrictions still require individual checks.
 
 | Rule | Scope and boundary | Official source |
 | --- | --- | --- |
-| Common Travel Area | GB → IE and IE → GB, based on citizenship. No rights inferred from visitor visas or residence permits. Crown Dependencies are not destinations in this dataset. | [UK government](https://www.gov.uk/government/publications/common-travel-area-guidance/common-travel-area-guidance), [Irish government](https://www.gov.ie/en/department-of-foreign-affairs/publications/the-common-travel-area/) |
+| Common Travel Area | GB → IE and IE → GB, based on citizenship. No rights inferred from visitor visas or residence permits. Crown Dependency destinations added in the 13 September audit below. | [UK government](https://www.gov.uk/government/publications/common-travel-area-guidance/common-travel-area-guidance), [Irish government](https://www.gov.ie/en/department-of-foreign-affairs/publications/the-common-travel-area/) |
 | EU citizenship | EU → EU, with residence conditions and registration. | [Your Europe](https://europa.eu/youreurope/citizens/residence/residence-rights/index_en.htm) |
 | EEA | EU plus Iceland, Liechtenstein and Norway. Reciprocal movement with a Liechtenstein residence exception. | [EFTA](https://www.efta.int/eea/policy-areas/persons) |
 | EU–Switzerland | EU ↔ CH; residence depends on the agreement’s economic/study/resources conditions and local procedures. | [Agreement summary](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=legissum%3Aem0025), [Swiss migration authority](https://www.sem.admin.ch/sem/en/home/themen/fza_schweiz-eu-efta/eu-efta_buerger_schweiz/faq.html) |
@@ -83,3 +83,51 @@ The optional `associationRoute` enum and tri-state `associationConfirmed` boolea
 Worker stages require continuing membership of the lawful labour force, genuine/effective work and retained rights. Family stages depend on authorised admission and qualifying family residence, not merely time since a wedding. Country-specific improvements remain possible, including the Dutch TWV rules. Confirmation is a declaration, not an administrative determination. Interruptions, long absences, public-policy restrictions, historical rights, service-provider and standstill exceptions, and new UK dependent-child entry applications require separate assessment. UK extensions and Dutch self-employed applications remain conditional even when the user confirms the listed conditions.
 
 An active linked passport and residence entry are required to display the declared acquired stage. Expired or missing documents do not establish that legal association rights have been lost; the app does not adjudicate retained rights after document expiry. A held permit remains independently visible even if association conditions are unconfirmed or unmet. Existing visa/Schengen permit travel rules remain separate.
+
+
+## IMI Daily settlement-bloc coverage — 13 September 2026
+
+All 21 headings in the [IMI Daily overview](https://www.imidaily.com/supranational-settlement-blocs-ssbs/) are represented: EU/EEA, MERCOSUR-RA, CARICOM-CSME, GCC, Nordic Passport Union, CTA, TTTA, CoFA, EAEU, India–Nepal, EAC, OECS, Benelux, CAN, ECOWAS, CA-4, Pacific Alliance, CPLP, ASEAN, APEC and the African passport initiative. The overview defines scope, not legal classifications. Official sources determine the displayed conditions. EU/EEA, CTA, TTTA and Greenland routes retain their existing assessments.
+
+`SETTLEMENT_BLOCS` supplies additional directional routes. Overlaps are retained, including CAN/MERCOSUR, OECS/CSME/enhanced CARICOM and Benelux/EU. Residence applications and employment-dependent schemes are conditional. APEC and the AU initiative add an explanation in Live mode with category `unknown`, not a residence entitlement. An APEC business-card route in Visit mode remains conditional: the wallet does not establish a card or destination pre-clearance. Existing visitor routes remain independently available. CoFA US entry is conditional even if the passport snapshot reports a waiver, because acquisition-of-citizenship eligibility is unconfirmed.
+
+| Additional rule | Authority |
+| --- | --- |
+| MERCOSUR Residence Agreement | [Official source](https://www.mercosur.int/documento/acuerdo-residencia-nacionales-estados-partes-mercosur) |
+| Andean Community (CAN) residence | [Official source](https://www.comunidadandina.org/notas-de-prensa/hoy-entra-en-vigencia-el-estatuto-migratorio-andino/) |
+| CARICOM Single Market and Economy (CSME) | [Official source](https://caricom.org/csme-resources/) |
+| CARICOM enhanced free movement | [Official source](https://www.foreign.gov.bb/faqs-on-enhanced-cooperation-in-movement-of-caricom-nationals/) |
+| Gulf Cooperation Council (GCC) | [Official source](https://www.gcc-sg.org/en/MediaCenter/DigitalLibrary/Documents/1274592562.pdf) |
+| Nordic Passport Union / Nordic residence | [Official source](https://www.norden.org/en/info-norden/work-and-residence-permits-faroe-islands) |
+| Benelux Union | [Official source](https://www.benelux.int/en/information-for-citizens/benelux-union/about-us/benelux-treaty/) |
+| Compact of Free Association (CoFA) · United States | [Official source](https://www.uscis.gov/sites/default/files/document/fact-sheets/FactSheetVerifyFASCitizens.pdf) |
+| Compact of Free Association (CoFA) · Pacific states | [Official source](https://www.doi.gov/oia/compacts) |
+| Eurasian Economic Union (EAEU) workers | [Official source](https://eec.eaeunion.org/upload/iblock/9fc/ef4tm95rjpz5qimsd8iogeltvpnv9uwi/EAEU-10-Eng.pdf) |
+| India–Nepal Treaty of Peace and Friendship | [Official source](https://www.mea.gov.in/Images/pdf/rti-samsher-9-11-140001.pdf) |
+| East African Community (EAC) Common Market | [Official source](https://www.eac.int/working-in-east-africa) |
+| OECS Economic Union free movement | [Official source](https://pressroom.oecs.int/oecs-continues-to-strengthen-the-free-movement-of-persons-regime) |
+| ECOWAS residence and establishment | [Official source](https://www.ecowas.int/press-statement-2/) |
+| ECOWAS · withdrawn-state transitional arrangements | [Official source](https://www.ecowas.int/press-statement-2/) |
+| Central America Four (CA-4) · residence requires approval | [Official source](https://inm.gob.hn/residencias.html) |
+| Pacific Alliance · working-holiday mobility | [Official source](https://alianzapacifico.net/en/download/acuerdo-interinstitucional-de-la-alianza-del-pacifico-para-un-programa-de-vacaciones-y-trabajo/) |
+| Community of Portuguese Language Countries (CPLP) | [Official source](https://www.cplp.org/organizacao/mobilidade-circulacao-e-cidadania/) |
+| Portugal · CPLP residence application | [Official source](https://aima.gov.pt/pt/noticias/kgljg) |
+| ASEAN · professional mobility | [Official source](https://investasean.asean.org/asean-framework/mras/) |
+| APEC Business Travel Card (ABTC) | [Official source](https://www.apec.org/groups/committee-on-trade-and-investment/business-mobility-group/abtc/faq) |
+| African Union passport initiative · no general settlement right | [Official source](https://www.au.int/en/treaties/protocol-treaty-establishing-african-economic-community-relating-free-movement-persons) |
+
+Territory coverage: FO, AX, GG, JE and IM are destination-only. Greenland/Faroe Islands nationals use DK, Åland nationals FI, and British citizens from Crown Dependencies GB; territory codes never invent new nationalities. Åland is covered as Finnish territory for EU/EEA/Swiss movement and Schengen visits, including shared visa clocks. It is not added to the EU member-state list. Faroe Islands and Greenland remain outside Schengen. Crown Dependency CTA immigration exemptions do not remove local housing/population or employment controls. See [Jersey](https://www.gov.je/LifeEvents/MovingToJersey/LivingInJersey/Pages/Work.aspx), [Guernsey](https://parliament.gg/parliamentary-business/assets/propositions/p2022-81), [Isle of Man](https://www.gov.im/immigration), [Åland](https://www.norden.org/en/info-norden/aland-right-domicile) and [Nordic nationality guidance](https://www.udi.no/en/want-to-apply/residence-under-the-eueeu-regulations/nordic-nationals-who-are-going-to-live-in-norway/).
+
+Corrections and boundaries relative to the overview:
+
+- [Timor-Leste joined ASEAN on 26 October 2025](https://asean.org/forging-a-new-era-timor-leste-admitted-into-asean/). Membership is not automatic participation in every professional arrangement.
+- Enhanced CARICOM movement applies only among BB/BZ/DM/VC from 1 October 2025. Other CSME routes require appropriate skills/establishment eligibility. No blanket exclusion based on investment citizenship is inferred.
+- EAC residence is tied to qualifying economic activity/family status and national implementation, not unconditional permanent residence based only on identity. EAEU worker residence likewise requires a qualifying contract.
+- MERCOSUR applicants must check naturalisation duration, documentation and permanent-residence conditions. CAN permanent residence is a separate process; no automatic immediate permanent permit is inferred. Venezuela is excluded from the multilateral residence list.
+- ECOWAS has 12 current members. BF/ML/NE are separately represented as origins under the published until-further-notice transitional treatment; no reciprocity or continued membership is inferred.
+- CoFA is bilateral with the US, not an all-to-all Pacific settlement union. US citizens moving to a Pacific Compact state must check its national residence/employment requirements.
+- OECS coverage follows the six sovereign origins listed in the overview. Montserrat’s distinct nationality/local-status implementation is outside this addition; associate OECS members are not automatically included.
+- CA-4 travel arrangements do not grant a verified permanent-settlement right. Pacific Alliance working-holiday programmes require destination-specific approval. CPLP implementation is country-specific; Portugal’s current process requires the relevant consular visa.
+- APEC nationality alone does not grant an ABTC or pre-clearance; US/Canada participation does not remove visa requirements. The African passport initiative creates no ordinary-passport residence entitlement. Western Sahara is in the AU membership list but is not a supported passport/destination in the bundled matrix.
+
+Validation: `tests/settlement.test.js` covers every added configured corridor, overlap, current-versus-withdrawn membership, effective dates, asymmetric CoFA/ECOWAS boundaries, expiry, admission restrictions, territory profiles and Schengen clock coverage. `tests/settlement-browser.js` covers rendered sources, destinations, filters, counters and JPEG export.

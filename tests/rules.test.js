@@ -38,7 +38,7 @@ for (const [origin,destination] of [['GB','IE'],['IE','GB']]) {
   const result=run(destination,[p(origin)],mode,{});
   assert.equal(result.category,mode==='live'?'live':'free');
   assert.equal(result.best.source,R.sources.cta);
-  assert.equal(result.best.reviewed,'2026-09-12');
+  assert.equal(result.best.reviewed,R.REVIEWED);
  }
 }
 for (const origin of [...R.EEA,'CH']) for (const destination of [...R.EEA,'CH']) {
@@ -65,7 +65,9 @@ for (const origin of R.VISA_WAIVER) for (const destination of R.SCHENGEN) {
  const passport={...p(origin),biometric:true,nationalId:true,sarPassport:true};
  const result=run(destination,[passport],'visit',{});
  assert.equal(result.category,'free',`${origin} → ${destination} waiver`);
- assert.equal(run(destination,[passport],'live',{}).category,'unknown');
+ // Brazil and Timor-Leste separately have a conditional CPLP route in Portugal.
+ assert.equal(run(destination,[passport],'live',{}).category,
+   destination==='PT' && ['BR','TL'].includes(origin) ? 'conditional' : 'unknown');
  if(origin!=='BR')assert.equal(result.best.days,90);
 }
 for (const country of R.BIOMETRIC) {
@@ -94,7 +96,7 @@ console.log('Passed: CTA, EU/EEA/Swiss/EFTA corridor matrix, Liechtenstein quota
 
 // Dated updates, extra destinations and document-based exemptions.
 assert.ok(R.destinationCodes(matrix).includes('GL'));
-assert.equal(R.destinationCodes(matrix).length,204);
+assert.equal(R.destinationCodes(matrix).length,209);
 for(const origin of ['GB','CA']) {
  for(const date of ['2026-02-17','2026-09-12','2026-12-31']) {
   const result=R.evaluate('CN',[p(origin)],'visit',matrix,date);
