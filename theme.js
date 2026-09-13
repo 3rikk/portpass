@@ -2,12 +2,12 @@
 (function() {
   const themeKey='portpass-theme',paletteKey='portpass-palette',system=matchMedia('(prefers-color-scheme: dark)');
   const themes=['system','light','dark'];
-  const palettes=['default','amber','rose','violet','teal','slate'];
-  const names={default:'Default',amber:'Amber',rose:'Rose',violet:'Violet',teal:'Teal',slate:'Slate'};
+  const palettes=['rose','default','amber','violet','teal','slate'];
+  const names={default:'Green',amber:'Amber',rose:'Rose',violet:'Violet',teal:'Teal',slate:'Slate'};
   const swatches={default:'#66835e',amber:'#b9773f',rose:'#a96674',violet:'#77649b',teal:'#4f827a',slate:'#587691'};
   const validTheme=value=>themes.includes(value)?value:'system';
-  const validPalette=value=>palettes.includes(value)?value:'default';
-  let preference='system',palette='default';
+  const validPalette=value=>palettes.includes(value)?value:'rose';
+  let preference='system',palette='rose';
   try{preference=validTheme(localStorage.getItem(themeKey));palette=validPalette(localStorage.getItem(paletteKey));}catch{}
 
   const style=document.createElement('style');
@@ -21,7 +21,7 @@ html:root[data-palette="teal"]{--ink:#243735;--muted:#718581;--green:#3f7169;--l
 html:root[data-palette="slate"]{--ink:#27333f;--muted:#75818e;--green:#4e6c87;--line:#dde4eb;--paper:#f5f7f9;--surface:#fcfdff;--lime:#d5e0ea;--palette-soft:#e0e8ef;--palette-soft-2:#e8edf2;--palette-soft-3:#e5eaf0;--palette-border:#d2dde7;--palette-map:#f8fafc;--palette-highlight:#6d8194}
 html:root[data-theme="dark"][data-palette="default"]{--warning:#f1a58d;--ink:#e1e7f0;--muted:#a7b3c5;--green:#a9bfe5;--line:#36445b;--paper:#171e2b;--surface:#202b3c;--lime:#bdcdef;--palette-soft:#26354a;--palette-soft-2:#2a3545;--palette-soft-3:#253244;--palette-border:#3e5069;--palette-map:#1b2534;--palette-highlight:#9cb5db}
 html:root[data-theme="dark"][data-palette="amber"]{--warning:#f1a58d;--ink:#f0e5da;--muted:#c5b3a2;--green:#d9a268;--line:#514235;--paper:#241d17;--surface:#30261e;--lime:#d9b785;--palette-soft:#3a2c21;--palette-soft-2:#3b3027;--palette-soft-3:#352a22;--palette-border:#604d3c;--palette-map:#291f19;--palette-highlight:#c39567}
-html:root[data-theme="dark"][data-palette="rose"]{--warning:#f1a58d;--ink:#f0e3e8;--muted:#c5adb7;--green:#d59aaa;--line:#513943;--paper:#241a1e;--surface:#31242a;--lime:#d8a6b3;--palette-soft:#3a2830;--palette-soft-2:#3c2d33;--palette-soft-3:#36272d;--palette-border:#60434e;--palette-map:#291d22;--palette-highlight:#c18b9a}
+html:root[data-theme="dark"][data-palette="rose"]{--warning:#f1a58d;--ink:#ebe7ea;--muted:#b7adb2;--green:#c78f9d;--line:#3f414a;--paper:#191d25;--surface:#222832;--lime:#d0a3ae;--palette-soft:#30272d;--palette-soft-2:#2d282d;--palette-soft-3:#29272b;--palette-border:#4a3c42;--palette-map:#1c2028;--palette-highlight:#b98a97}
 html:root[data-theme="dark"][data-palette="violet"]{--warning:#f1a58d;--ink:#eae5f2;--muted:#b9afc8;--green:#b8a5da;--line:#443b59;--paper:#1f1b29;--surface:#2a2437;--lime:#bcaadb;--palette-soft:#302941;--palette-soft-2:#332d40;--palette-soft-3:#2d273b;--palette-border:#504663;--palette-map:#241f30;--palette-highlight:#aa98ca}
 html:root[data-theme="dark"][data-palette="teal"]{--warning:#f1a58d;--ink:#e0ecea;--muted:#a6c0bc;--green:#82bdb4;--line:#34504c;--paper:#162221;--surface:#1e302e;--lime:#8dbfb8;--palette-soft:#233936;--palette-soft-2:#293b38;--palette-soft-3:#243532;--palette-border:#3e5c57;--palette-map:#192825;--palette-highlight:#75aaa2}
 html:root[data-theme="dark"][data-palette="slate"]{--warning:#f1a58d;--ink:#e2e9f0;--muted:#aab7c5;--green:#91b0ce;--line:#384a5d;--paper:#18202a;--surface:#222e3a;--lime:#9cb5cd;--palette-soft:#283848;--palette-soft-2:#2b3947;--palette-soft-3:#273441;--palette-border:#42576c;--palette-map:#1c2732;--palette-highlight:#84a1bd}
@@ -55,7 +55,7 @@ html:root[data-theme="dark"] .palette-swatch[data-palette="default"]{--swatch:#9
   function themeValue(){return preference==='system'?(system.matches?'dark':'light'):preference;}
   function themeColour(theme,paletteName){
     const light={default:'#f7f8f5',amber:'#faf7f2',rose:'#faf6f7',violet:'#f8f6fa',teal:'#f5f8f7',slate:'#f5f7f9'};
-    const dark={default:'#171e2b',amber:'#241d17',rose:'#241a1e',violet:'#1f1b29',teal:'#162221',slate:'#18202a'};
+    const dark={default:'#171e2b',amber:'#241d17',rose:'#191d25',violet:'#1f1b29',teal:'#162221',slate:'#18202a'};
     return (theme==='dark'?dark:light)[paletteName];
   }
   function apply() {
