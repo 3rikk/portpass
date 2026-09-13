@@ -1,0 +1,37 @@
+:root{
+  --i:#243c31;
+  --m:#7b857e;
+  --p:#f7f8f5;
+  --s:#fff;
+  --l:#e3e7df;
+  --a:#365d46;
+  --status-free:#356746;
+  --status-live:#356746;
+  --status-conditional:#7a5c19;
+  --status-online:#7a5c19;
+  --status-arrival:#7a5c19;
+  --status-required:#96453a;
+  --status-restricted:#96453a;
+}
+:root[data-theme="dark"]{
+  --i:#e1e7f0;
+  --m:#a7b3c5;
+  --p:#171e2b;
+  --s:#202b3c;
+  --l:#36445b;
+  --a:#a9bfe5;
+  --status-free:#839fc9;
+  --status-live:#839fc9;
+  --status-conditional:#b9a6d1;
+  --status-online:#a39dc4;
+  --status-arrival:#c3b78b;
+  --status-required:#baa698;
+  --status-restricted:#bf929e;
+}
+.status-free{color:var(--status-free)!important}
+.status-live{color:var(--status-live)!important}
+.status-conditional{color:var(--status-conditional)!important}
+.status-online{color:var(--status-online)!important}
+.status-arrival{color:var(--status-arrival)!important}
+.status-required{color:var(--status-required)!important}
+.status-restricted{color:var(--status-restricted)!important}
