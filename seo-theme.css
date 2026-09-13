@@ -35,4 +35,9 @@
 .status-arrival{color:var(--status-arrival)!important}
 .status-required{color:var(--status-required)!important}
 .status-restricted{color:var(--status-restricted)!important}
+/* Guide links keep the colour of the text they belong to; underline is the only link cue. */
+a:not(.button){color:inherit}
+.links a,.source a{color:inherit}
+a:not(.button){text-decoration:underline}
+.button{text-decoration:none}
 :root[data-theme="dark"] .button{color:var(--p)!important}
