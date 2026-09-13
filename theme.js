@@ -66,8 +66,11 @@ html:root[data-palette] .alpha-warning-copy a{color:inherit;text-decoration:unde
 html:root[data-palette] .alpha-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}
 html:root[data-palette] .alpha-actions button{padding:13px;border-radius:7px;font-size:12px}
 html:root[data-palette] .alpha-cancel{background:var(--palette-soft-3);color:var(--ink);border:1px solid var(--line)}
-html:root[data-palette] .alpha-continue{background:var(--palette-soft);color:var(--green);border:1px solid var(--palette-border);font-weight:600}
+html:root[data-palette] .alpha-continue{background:var(--palette-soft);color:var(--green);border:1px solid var(--palette-border);font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px}
 html:root[data-theme="dark"][data-palette] .alpha-continue{color:var(--ink)}
+html:root[data-palette] .alpha-countdown{--progress:100%;width:25px;height:25px;min-width:25px;border-radius:50%;display:inline-grid;place-items:center;position:relative;font-size:9px;font-weight:700;line-height:1;background:conic-gradient(var(--green) var(--progress),color-mix(in srgb,var(--green) 16%,transparent) 0)}
+html:root[data-palette] .alpha-countdown::before{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--palette-soft)}
+html:root[data-palette] .alpha-countdown span{position:relative;z-index:1}
 @media(max-width:480px){html:root[data-palette] .theme-nudge{max-width:210px}html:root[data-palette] .alpha-actions{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){html:root[data-palette] .palette-swatch,html:root[data-palette] .theme-nudge{transition:none}}
 `;
@@ -144,20 +147,44 @@ html:root[data-theme="dark"][data-palette] .alpha-continue{color:var(--ink)}
     if(!document.querySelector('#share-map')||document.querySelector('#alpha-site-button'))return;
     const footerLinks=document.querySelector('footer .footer-links');
     if(!footerLinks)return;
+    const onAlpha=location.hostname.toLowerCase()==='alpha.portpass.world';
     const button=document.createElement('button');
-    button.id='alpha-site-button';button.type='button';button.className='alpha-site-button';button.textContent='View alpha branch ↗';
+    button.id='alpha-site-button';button.type='button';button.className='alpha-site-button';button.textContent=onAlpha?'View stable website ↗':'View alpha branch ↗';
     footerLinks.appendChild(button);
 
     const dialog=document.createElement('dialog');
     dialog.id='alpha-warning-dialog';dialog.setAttribute('aria-labelledby','alpha-warning-title');
-    dialog.innerHTML='<div class="dialog-heading"><div><div class="eyebrow">WARNING</div><h2 id="alpha-warning-title">Alpha site</h2></div><button type="button" class="close" aria-label="Close">×</button></div><p class="alpha-warning-copy">This is an advanced option. The alpha version of the site may have bugs. Check <a href="https://github.com/3rikk/portpass/tree/alpha" target="_blank" rel="noopener">https://github.com/3rikk/portpass/tree/alpha</a> to see what\'s new.</p><div class="alpha-actions"><button type="button" class="alpha-cancel">Cancel</button><button type="button" class="alpha-continue">Continue to alpha site</button></div>';
+    dialog.innerHTML=onAlpha
+      ? '<div class="dialog-heading"><div><div class="eyebrow">CONFIRMATION</div><h2 id="alpha-warning-title">Return to stable?</h2></div><button type="button" class="close" aria-label="Close">×</button></div><p class="alpha-warning-copy">You are about to leave the Alpha branch and go back to the Stable website.</p><p>Are you sure?</p><div class="alpha-actions"><button type="button" class="alpha-cancel">Cancel</button><button type="button" class="alpha-continue">Continue to stable <span class="alpha-countdown" aria-label="Automatic redirect countdown"><span>10</span></span></button></div>'
+      : '<div class="dialog-heading"><div><div class="eyebrow">WARNING</div><h2 id="alpha-warning-title">Alpha site</h2></div><button type="button" class="close" aria-label="Close">×</button></div><p class="alpha-warning-copy">This is an advanced option. The alpha version of the site may have bugs. Check <a href="https://github.com/3rikk/portpass/tree/alpha" target="_blank" rel="noopener">https://github.com/3rikk/portpass/tree/alpha</a> to see what\'s new.</p><div class="alpha-actions"><button type="button" class="alpha-cancel">Cancel</button><button type="button" class="alpha-continue">Continue to alpha site</button></div>';
     document.body.appendChild(dialog);
-    const close=()=>dialog.close();
-    button.addEventListener('click',()=>dialog.showModal());
+
+    const destination=onAlpha?'https://portpass.world/':'https://alpha.portpass.world/';
+    const continueButton=dialog.querySelector('.alpha-continue');
+    const countdown=dialog.querySelector('.alpha-countdown');
+    const countdownText=countdown?.querySelector('span');
+    let countdownTimer=null,deadline=0;
+    const stopCountdown=()=>{if(countdownTimer){clearInterval(countdownTimer);countdownTimer=null;}};
+    const redirect=()=>{stopCountdown();location.href=destination;};
+    const close=()=>{stopCountdown();dialog.close();};
+    const startCountdown=()=>{
+      if(!onAlpha||!countdown)return;
+      stopCountdown();deadline=Date.now()+10000;
+      const tick=()=>{
+        const left=Math.max(0,deadline-Date.now());
+        const seconds=Math.ceil(left/1000);
+        if(countdownText)countdownText.textContent=String(seconds);
+        countdown.style.setProperty('--progress',`${Math.max(0,Math.min(100,left/100))}%`);
+        if(left<=0)redirect();
+      };
+      tick();countdownTimer=setInterval(tick,100);
+    };
+    button.addEventListener('click',()=>{dialog.showModal();startCountdown();});
     dialog.querySelector('.close').addEventListener('click',close);
     dialog.querySelector('.alpha-cancel').addEventListener('click',close);
-    dialog.querySelector('.alpha-continue').addEventListener('click',()=>{location.href='https://alpha.portpass.world/';});
-    dialog.addEventListener('click',event=>{if(event.target===dialog){const rect=dialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)dialog.close();}});
+    continueButton.addEventListener('click',redirect);
+    dialog.addEventListener('close',stopCountdown);
+    dialog.addEventListener('click',event=>{if(event.target===dialog){const rect=dialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)close();}});
   }
   function initEnvironmentBadge(){
     const badge=document.querySelector('.beta');
