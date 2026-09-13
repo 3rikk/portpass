@@ -62,4 +62,10 @@ assert.equal(saved.store['portpass-theme'],'dark');
 assert.equal(saved.store['portpass-palette'],'amber');
 assert.equal(saved.swatches.find(button=>button.dataset.palette==='amber')['aria-checked'],'true');
 
-console.log('Theme engine passed: rose default in system light/dark, six accent circles, persistence and independent light/dark mode.');
+assert.match(code,/\.palette-picker\{[^}]*justify-content:center[^}]*width:100%/,'palette swatches stay centered');
+assert.match(code,/\.header-menu \.palette-picker\{margin-top:-8px/,'palette row stays close to theme control');
+assert.match(code,/\.intro h1 span\{color:var\(--green\)\}/,'headline accent follows selected palette');
+assert.match(code,/--category-unknown:color-mix\(in srgb,var\(--green\)/,'unhighlighted map countries follow selected palette');
+assert.match(code,/data-theme="dark"\]\[data-palette="rose"\] \.mode\{background:#20252d/,'dark rose segmented control uses a neutral track');
+
+console.log('Theme engine passed: rose default, compact centered picker, restrained dark control and palette-driven text/map accents.');
