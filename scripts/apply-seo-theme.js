@@ -5,6 +5,7 @@ const FAVICON='<link rel="icon" href="/favicon.png" type="image/png" sizes="96x9
 const THEME_HEAD='<meta name="color-scheme" content="light dark"><meta name="theme-color" content="#f7f8f5" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#171e2b" media="(prefers-color-scheme: dark)"><script src="/theme.js"></script>';
 const THEME_STYLE='<link rel="stylesheet" href="/seo-theme.css">';
 const ALPHA_NOINDEX='<script data-portpass-alpha-noindex>(function(){if(location.hostname.toLowerCase()!=="alpha.portpass.world")return;var meta=document.querySelector("meta[name=robots]");if(!meta){meta=document.createElement("meta");meta.name="robots";document.head.appendChild(meta)}meta.content="noindex"})();</script>';
+const FOCUS_STYLE='<style data-portpass-theme-focus>button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline-color:var(--green)!important}</style>';
 function withFavicon(html){
   if(html.includes('/favicon.png'))return html;
   const svgIcon=/<link rel="icon" href="\/?icon\.svg" type="image\/svg\+xml">/;
@@ -17,8 +18,13 @@ function withAlphaNoindex(html){
   if(!html.includes('</head>'))throw Error('Page has an unexpected head structure.');
   return html.replace('</head>',ALPHA_NOINDEX+'</head>');
 }
+function withThemeFocus(html){
+  if(html.includes('data-portpass-theme-focus'))return html;
+  if(!html.includes('</head>'))throw Error('Page has an unexpected head structure.');
+  return html.replace('</head>',FOCUS_STYLE+'</head>');
+}
 function inject(html){
-  html=withAlphaNoindex(withFavicon(html));
+  html=withThemeFocus(withAlphaNoindex(withFavicon(html)));
   if(html.includes('/seo-theme.css')&&html.includes('/theme.js'))return html;
   const viewport='<meta name="viewport" content="width=device-width,initial-scale=1">';
   if(!html.includes(viewport)||!html.includes('</head>'))throw Error('Generated SEO page has an unexpected head structure.');
@@ -39,9 +45,9 @@ function apply(root=ROOT){
   for(const file of generated)fs.writeFileSync(file,inject(fs.readFileSync(file,'utf8')));
   for(const name of ['index.html','404.html','impressum.html']){
     const file=path.join(root,name);
-    if(fs.existsSync(file))fs.writeFileSync(file,withAlphaNoindex(withFavicon(fs.readFileSync(file,'utf8'))));
+    if(fs.existsSync(file))fs.writeFileSync(file,withThemeFocus(withAlphaNoindex(withFavicon(fs.readFileSync(file,'utf8')))));
   }
   return generated.length;
 }
-if(require.main===module)console.log('Applied shared Portpass theme, favicon and alpha indexing guard to '+apply()+' generated SEO pages.');
-module.exports={apply,inject,withFavicon,withAlphaNoindex};
+if(require.main===module)console.log('Applied shared Portpass theme, favicon, focus styling and alpha indexing guard to '+apply()+' generated SEO pages.');
+module.exports={apply,inject,withFavicon,withAlphaNoindex,withThemeFocus};
