@@ -7,7 +7,7 @@ function loadTheme(initial={}) {
   const root={dataset:{},style:{setProperty(key,value){this[key]=value;}}};
   let picker=null;
   const makeElement=tag=>({
-    tagName:tag.toUpperCase(),dataset:{},children:[],listeners:{},textContent:'',id:'',className:'',type:'',
+    tagName:tag.toUpperCase(),dataset:{},children:[],listeners:{},textContent:'',id:'',className:'',type:'',title:'',
     style:{setProperty(key,value){this[key]=value;}},
     setAttribute(key,value){this[key]=value;},
     addEventListener(type,listener){this.listeners[type]=listener;},
@@ -47,7 +47,7 @@ assert.equal(defaults.root.dataset.palette,'default');
 assert.equal(defaults.swatches.length,6);
 assert.equal(defaults.swatches[0].dataset.palette,'default');
 assert.equal(defaults.swatches[0]['aria-checked'],'true');
-assert.ok(defaults.swatches.every(button=>button.textContent===''),'palette controls have no visible text');
+assert.ok(defaults.swatches.every(button=>button.textContent===''&&button.title===''),'palette controls have no visible text');
 
 const saved=loadTheme({'portpass-theme':'dark','portpass-palette':'default'});
 saved.swatches.find(button=>button.dataset.palette==='amber').listeners.click();
