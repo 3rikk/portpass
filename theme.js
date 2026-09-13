@@ -71,6 +71,9 @@ html:root[data-theme="dark"][data-palette] .alpha-continue{color:var(--ink)}
 html:root[data-palette] .alpha-countdown{--progress:100%;width:25px;height:25px;min-width:25px;border-radius:50%;display:inline-grid;place-items:center;position:relative;font-size:9px;font-weight:700;line-height:1;background:conic-gradient(var(--green) var(--progress),color-mix(in srgb,var(--green) 16%,transparent) 0)}
 html:root[data-palette] .alpha-countdown::before{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--palette-soft)}
 html:root[data-palette] .alpha-countdown span{position:relative;z-index:1}
+html:root[data-palette] .export-theme-controls{position:relative}
+html:root[data-palette] .export-theme-controls>.export-palette-picker{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin:0}
+@media(max-width:720px){html:root[data-palette] .export-theme-controls{position:static}html:root[data-palette] .export-theme-controls>.export-palette-picker{position:static;transform:none;margin-top:8px}}
 @media(max-width:480px){html:root[data-palette] .theme-nudge{max-width:210px}html:root[data-palette] .alpha-actions{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){html:root[data-palette] .palette-swatch,html:root[data-palette] .theme-nudge{transition:none}}
 `;
