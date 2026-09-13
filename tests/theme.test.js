@@ -77,5 +77,10 @@ assert.match(code,/\.intro h1 span\{color:var\(--green\)\}/,'headline accent fol
 assert.match(code,/--category-unknown:color-mix\(in srgb,var\(--green\)/,'unhighlighted map countries follow selected palette');
 assert.match(code,/data-theme="dark"\]\[data-palette="rose"\] \.mode\{background:#20252d/,'dark rose segmented control uses a neutral track');
 assert.match(code,/hostname==='alpha\.portpass\.world'\?'ALPHA':'BETA'/,'environment badge stays hostname-aware');
+assert.match(code,/button\.textContent=onAlpha\?'View stable website ↗':'View alpha branch ↗'/,'footer environment switch is hostname-aware');
+assert.match(code,/You are about to leave the Alpha branch and go back to the Stable website\./,'alpha site uses a return-to-stable confirmation');
+assert.match(code,/destination=onAlpha\?'https:\/\/portpass\.world\/':'https:\/\/alpha\.portpass\.world\/'/,'environment switch targets the opposite hostname');
+assert.match(code,/deadline=Date\.now\(\)\+10000/,'stable return countdown lasts ten seconds');
+assert.match(code,/class="alpha-countdown"/,'stable return action includes the circular countdown');
 
-console.log('Theme engine passed: hostname badge, rose default, compact centered picker, restrained dark control and palette-driven text/map accents.');
+console.log('Theme engine passed: hostname badge and environment switch, stable-return countdown, rose default, centered picker and palette-driven accents.');
