@@ -111,7 +111,9 @@ window.PortpassMapExport = {
     ctx.textAlign = 'right';
     const brandRight = right + mapWidth - 24, brandY = height - 124;
     ctx.font = `700 45px ${font}`;
-    const markX = brandRight - ctx.measureText('portpass').width - 32;
+    const brandWidth = ctx.measureText('portpass.world').width;
+    const domainWidth = ctx.measureText('.world').width;
+    const markX = brandRight - brandWidth - 32;
     const markY = brandY + 26;
     ctx.save(); ctx.strokeStyle = palette.ink; ctx.lineWidth = 3.5;
     ctx.beginPath();
@@ -121,9 +123,10 @@ window.PortpassMapExport = {
       ctx.moveTo(markX - dx, markY - dy); ctx.lineTo(markX + dx, markY + dy);
     }
     ctx.stroke(); ctx.restore();
-    text('portpass', brandRight, brandY, 45, palette.ink, 700);
-    text('portpass.erik-kunz.com', right + mapWidth - 24, height - 66, 25, palette.muted);
+    text('portpass', brandRight - domainWidth, brandY, 45, palette.ink, 700);
+    text('.world', brandRight, brandY, 45, palette.muted, 600);
+    text('portpass.world', right + mapWidth - 24, height - 66, 25, palette.muted);
     const blob = await new Promise((resolve, reject) => canvas.toBlob(result => result ? resolve(result) : reject(new Error('Could not create the JPEG.')), 'image/jpeg', .94));
-    return new File([blob], `portpass-${mode}-map.jpg`, {type: 'image/jpeg'});
+    return new File([blob], `portpass-world-${mode}-map.jpg`, {type: 'image/jpeg'});
   }
 };

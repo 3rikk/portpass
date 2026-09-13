@@ -1,0 +1,30 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
+const SEO=require('../scripts/generate-seo.js');
+const german=SEO.overview('DE');
+assert.ok(german.visitKnown>0,'German overview has visit data');
+assert.ok(german.liveKnown>0,'German overview has live data');
+const swiss=SEO.destinationHTML('DE','CH',SEO.CONFIG.baseUrl);
+assert.equal(swiss.visit.category,'free');
+assert.equal(swiss.live.category,'live');
+assert.match(swiss.html,/EU–Switzerland free movement/);
+assert.match(swiss.html,/<h2>Visit<\/h2>[\s\S]*<h2>Live<\/h2>/);
+const compound=SEO.compoundHTML(SEO.CONFIG.baseUrl);
+assert.equal(compound.base.category,'online');
+assert.equal(compound.combined.category,'document');
+assert.equal(SEO.shouldIndex('compound',compound),true);
+assert.equal(SEO.shouldIndex('destination',{origin:'DE',destination:'FR',visit:{category:'unknown'},live:{category:'unknown'}}),false);
+const root=fs.mkdtempSync(path.join(os.tmpdir(),'portpass-seo-'));
+try {
+ const output=SEO.generate({outputRoot:root,log:()=>{}});
+ assert.ok(output.total>200,'controlled corpus generated');
+ const germany=path.join(root,'passport','germany','index.html');
+ const germanySwiss=path.join(root,'passport','germany','switzerland','index.html');
+ const proof=path.join(root,'travel','india','germany-residence-permit','albania','index.html');
+ for(const file of [germany,germanySwiss,proof])assert.ok(fs.existsSync(file),file);
+ assert.match(fs.readFileSync(germanySwiss,'utf8'),/https:\/\/portpass\.world\/passport\/germany\/switzerland\//);
+ const sitemap=fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');
+ assert.match(sitemap,/https:\/\/portpass\.world\/passport\/germany\//);
+ assert.match(sitemap,/germany-residence-permit\/albania/);
+ console.log('SEO generation passed: engine-backed overview, distinct visit/live, compound permit route, filtering and sitemap.');
+} finally {fs.rmSync(root,{recursive:true,force:true});}

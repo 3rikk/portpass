@@ -1,6 +1,6 @@
 # Portpass
 
-https://portpass.erik-kunz.com
+https://portpass.world
 
 <img width="1505" height="856" alt="image" src="https://github.com/user-attachments/assets/023d88b6-12f8-40a4-843a-04a8a8615386" />
 
@@ -65,6 +65,19 @@ Browser checks: install Playwright in your development environment, start the se
 This is a no-build static site and can be deployed either as a Workers Static
 Assets application or as a Cloudflare Pages project.
 
+### Programmatic SEO
+
+Build the static, engine-backed mobility guides before a deployment:
+
+```sh
+npm run build:seo
+```
+
+This produces the controlled guide corpus in `passport/` and `travel/`, plus
+`sitemap.xml` and `robots.txt`. The deploy commands run this step automatically.
+The generated files are intentionally ignored by Git and included in the
+Cloudflare asset upload through `.assetsignore`.
+
 Install the local Cloudflare CLI and authenticate once:
 
 ```sh
@@ -84,8 +97,8 @@ Deploy as a Worker:
 npm run deploy:worker
 ```
 
-For Git-connected Workers Builds, leave the build command empty and use
-`npm run deploy:worker` as the deploy command. The root `.assetsignore` allows
+For Git-connected Workers Builds, use `npm run build:seo` as the build command;
+the Worker deployment itself is handled by the connected build. The root `.assetsignore` allows
 only the site's files, `data/`, and `vendor/` to be uploaded. Add new public
 files there when needed. Wrangler does not support `assets.exclude` in
 `wrangler.jsonc`; without `.assetsignore`, using the repository root as the
@@ -98,8 +111,8 @@ create it):
 npm run deploy:pages
 ```
 
-For a Git-connected Pages project, use `.` as the build output directory and
-leave the build command empty. The `wrangler.pages.jsonc` file records the same
+For a Git-connected Pages project, use `npm run build:seo` as the build command
+and `.` as the build output directory. The `wrangler.pages.jsonc` file records the same
 configuration for CLI deployments. The Worker and Pages configs are separate
 because Cloudflare uses different configuration keys for those services.
 

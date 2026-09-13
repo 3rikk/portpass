@@ -33,7 +33,7 @@ const fs = require('node:fs/promises');
     assert.ok(image.width >= 1800 && image.height >= 1100);
     const drawing = await page.evaluate(()=>window.exportDrawing);
     const mapBox = drawing.boxes.reduce((largest,box)=>box.width>largest.width?box:largest);
-    for (const label of ['MAP KEY','portpass','portpass.erik-kunz.com']) {
+    for (const label of ['MAP KEY','portpass','.world','portpass.world']) {
       const text = drawing.texts.find(item=>item.value===label);
       assert.ok(text && text.x>mapBox.x && text.x<mapBox.x+mapBox.width && text.y>mapBox.y && text.y<mapBox.y+mapBox.height,label);
     }
@@ -44,7 +44,7 @@ const fs = require('node:fs/promises');
     }
 
     const [download] = await Promise.all([page.waitForEvent('download'),page.click('#download-map')]);
-    assert.equal(download.suggestedFilename(),'portpass-visit-map.jpg');
+    assert.equal(download.suggestedFilename(),'portpass-world-visit-map.jpg');
     const bytes = await fs.readFile(await download.path());
     assert.deepEqual([...bytes.subarray(0,3)],[255,216,255]);
     await page.keyboard.press('Escape');
@@ -61,7 +61,7 @@ const fs = require('node:fs/promises');
     await page.click('#share-map'); await page.waitForSelector('#share-image');
     await page.click('#share-image');
     const shared = await page.evaluate(()=>window.sharedFile);
-    assert.equal(shared.name,'portpass-live-map.jpg');assert.equal(shared.type,'image/jpeg');assert.ok(shared.size>10000);
+    assert.equal(shared.name,'portpass-world-live-map.jpg');assert.equal(shared.type,'image/jpeg');assert.ok(shared.size>10000);
     await page.evaluate(()=>Object.defineProperty(navigator,'share',{configurable:true,value:async()=>{throw new DOMException('Cancelled','AbortError');}}));
     await page.click('#share-image');
     assert.match(await page.locator('#share-status').innerText(),/cancelled/);
