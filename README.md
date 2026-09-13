@@ -1,8 +1,33 @@
-# Portpass
+<div align="center">
+  <img src="icon.svg" alt="portpass.world icon" width="72" height="72">
 
- Visit at https://portpass.world
+  <h1>portpass.world</h1>
 
-![Portpass dark mode banner](assets/portpass-banner.png)
+  <p><strong>Travel eligibility, mapped around the documents you actually hold.</strong></p>
+
+  <p>
+    Portpass checks passports, residence permits and visas together, then turns the result into a private, browser-local travel and residence map.
+  </p>
+
+  <p>
+    <a href="https://portpass.world"><strong>Open portpass.world</strong></a>
+    ·
+    <a href="#features">Features</a>
+    ·
+    <a href="#sources-and-limitations">Sources</a>
+    ·
+    <a href="#cloudflare-deployment">Deployment</a>
+  </p>
+
+  <p>
+    <sub>No accounts · no uploaded document scans · profiles stay local unless you export them yourself</sub>
+  </p>
+</div>
+
+<picture>
+  <source media="(prefers-color-scheme: light)" srcset="assets/portpass-banner-light.png">
+  <img src="assets/portpass-banner.png" alt="Portpass world map and local travel wallet interface">
+</picture>
 
 ## Features
 
@@ -59,7 +84,6 @@ Review upstream timestamp and changes before replacing the passport JSON. Preser
 Tests: `node tests/rules.test.js` from this directory.
 
 Browser checks: install Playwright in your development environment, start the server above, then run `node tests/browser.cjs`. Run `node tests/map-export.cjs` for JPEG download and sharing checks. Set `PORTPASS_URL` to test another URL. Screenshots are written to `/tmp/portpass-desktop.png` and `/tmp/portpass-mobile.png`.
-# Portpass
 
 ## Cloudflare deployment
 
