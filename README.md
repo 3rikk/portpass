@@ -141,7 +141,7 @@ This produces the controlled guide corpus in `passport/` and `travel/`, plus
 The generated files are intentionally ignored by Git and included in the
 Cloudflare asset upload through `.assetsignore`.
 
-The build post-processor also applies the shared theme script/styles, Google-compatible favicon markup and the hostname-aware Alpha indexing guard to generated/static HTML. Browser favicons retain the SVG icon while a square 96×96 PNG is declared for search-engine compatibility. Keep `/favicon.png` in the Cloudflare asset allowlist.
+The build post-processor also applies the shared theme script/styles, favicon markup and the hostname-aware Alpha indexing guard to generated/static HTML. The liquid-glass app mark ships as a square 96×96 PNG for search engines, a self-contained SVG browser fallback, a multi-size ICO and a 180×180 Apple touch icon. Keep those root icon files in the Cloudflare asset allowlist.
 
 The generated crawler policy allows normal search engines and AI crawlers through
 `User-agent: *`, with explicit allowances for `OAI-SearchBot`, `GPTBot`,

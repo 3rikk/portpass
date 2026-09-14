@@ -9,11 +9,18 @@ assert.match(output,/<meta name="theme-color" content="#f7f8f5"/);
 assert.match(output,/<meta name="theme-color" content="#171e2b"/);
 assert.match(output,/<link rel="icon" href="\/favicon\.png" type="image\/png" sizes="96x96">/,'generated pages publish a Google-compatible PNG favicon');
 assert.match(output,/<link rel="icon" href="\/icon\.svg" type="image\/svg\+xml">/,'SVG favicon remains as a browser fallback');
+assert.match(output,/<link rel="apple-touch-icon" href="\/apple-touch-icon\.png" sizes="180x180">/,'generated pages publish an Apple touch icon');
 assert.equal(Theme.inject(output),output,'theme injection is idempotent');
 const legacy='<html><head><link rel="icon" href="icon.svg" type="image/svg+xml"></head></html>';
 const upgraded=Theme.withFavicon(legacy);
 assert.match(upgraded,/href="\/favicon\.png"/,'existing SVG-only pages are upgraded during build');
+assert.match(upgraded,/href="\/apple-touch-icon\.png"/,'existing SVG-only pages receive the Apple touch icon');
 assert.equal(Theme.withFavicon(upgraded),upgraded,'favicon injection is idempotent');
+
+const pngAndSvg='<html><head><link rel="icon" href="/favicon.png" type="image/png" sizes="96x96"><link rel="icon" href="/icon.svg" type="image/svg+xml"></head></html>';
+const withAppleTouch=Theme.withFavicon(pngAndSvg);
+assert.match(withAppleTouch,/href="\/apple-touch-icon\.png"/,'existing favicon markup receives the Apple touch icon');
+assert.equal(Theme.withFavicon(withAppleTouch),withAppleTouch,'Apple touch icon injection is idempotent');
 const css=fs.readFileSync(require.resolve('../seo-theme.css'),'utf8');
 assert.match(css,/a:not\(\.button\)\{color:inherit\}/,'ordinary guide links inherit surrounding text colour');
 assert.match(css,/\.links a,\.source a\{color:inherit\}/,'list and source links override generator accent colour');

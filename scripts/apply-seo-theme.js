@@ -1,13 +1,21 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path');
 const ROOT=path.resolve(__dirname,'..');
-const FAVICON='<link rel="icon" href="/favicon.png" type="image/png" sizes="96x96"><link rel="icon" href="/icon.svg" type="image/svg+xml">';
+const APPLE_TOUCH_ICON='<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">';
+const FAVICON='<link rel="icon" href="/favicon.png" type="image/png" sizes="96x96"><link rel="icon" href="/icon.svg" type="image/svg+xml">'+APPLE_TOUCH_ICON;
 const THEME_HEAD='<meta name="color-scheme" content="light dark"><meta name="theme-color" content="#f7f8f5" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#171e2b" media="(prefers-color-scheme: dark)"><script src="/theme.js"></script>';
 const THEME_STYLE='<link rel="stylesheet" href="/seo-theme.css">';
 const ALPHA_NOINDEX='<script data-portpass-alpha-noindex>(function(){if(location.hostname.toLowerCase()!=="alpha.portpass.world")return;var meta=document.querySelector("meta[name=robots]");if(!meta){meta=document.createElement("meta");meta.name="robots";document.head.appendChild(meta)}meta.content="noindex"})();</script>';
 const FOCUS_STYLE='<style data-portpass-theme-focus>button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline-color:var(--green)!important}</style>';
 function withFavicon(html){
-  if(html.includes('/favicon.png'))return html;
+  if(html.includes('/favicon.png')){
+    if(html.includes('/apple-touch-icon.png'))return html;
+    const svgIcon=/<link rel="icon" href="\/icon\.svg" type="image\/svg\+xml">/;
+    if(svgIcon.test(html))return html.replace(svgIcon,match=>match+APPLE_TOUCH_ICON);
+    const pngIcon=/<link rel="icon" href="\/favicon\.png" type="image\/png" sizes="96x96">/;
+    if(pngIcon.test(html))return html.replace(pngIcon,match=>match+APPLE_TOUCH_ICON);
+    throw Error('Page has an unexpected favicon structure.');
+  }
   const svgIcon=/<link rel="icon" href="\/?icon\.svg" type="image\/svg\+xml">/;
   if(svgIcon.test(html))return html.replace(svgIcon,FAVICON);
   if(!html.includes('</head>'))throw Error('Page has an unexpected head structure.');
