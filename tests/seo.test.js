@@ -38,6 +38,7 @@ try {
  assert.ok(swissGuide,'Germany–Switzerland guide is searchable');
  assert.match(swissGuide.title,/citizens visit or live in Switzerland/);
  assert.match(sitemap,/<loc>https:\/\/portpass\.world\/<\/loc>/);
+ assert.match(sitemap,/<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
  assert.match(sitemap,/https:\/\/portpass\.world\/passport\/germany\//);
  assert.match(sitemap,/germany-residence-permit\/albania/);
  const robots=fs.readFileSync(path.join(root,'robots.txt'),'utf8');
