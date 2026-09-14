@@ -2,6 +2,12 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 require('../visa-time.js');require('../rules.js');require('../profile.js');
 const SEO=require('../scripts/generate-seo.js');
+const homepage=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+assert.match(homepage,/<section class="product-definition"[\s\S]*<h2 id="what-is-portpass">What is Portpass\?<\/h2>/);
+assert.match(homepage,/href="\/passport\/">Passport guides<\/a>/);
+const llms=fs.readFileSync(path.join(__dirname,'..','llms.txt'),'utf8');
+assert.match(llms,/^# Portpass\n\n> Portpass is a free, private multi-passport travel and residence map/m);
+assert.match(llms,/\[Passport mobility guides\]\(https:\/\/portpass\.world\/passport\/\)/);
 const german=SEO.overview('DE');
 assert.ok(german.visitKnown>0,'German overview has visit data');
 assert.ok(german.liveKnown>0,'German overview has live data');
@@ -42,7 +48,7 @@ try {
  assert.match(sitemap,/https:\/\/portpass\.world\/passport\/germany\//);
  assert.match(sitemap,/germany-residence-permit\/albania/);
  const robots=fs.readFileSync(path.join(root,'robots.txt'),'utf8');
- for(const agent of ['*','OAI-SearchBot','GPTBot']) {
+ for(const agent of ['*','OAI-SearchBot','GPTBot','PerplexityBot','Perplexity-User','Claude-SearchBot','Claude-User','ClaudeBot']) {
   assert.ok(robots.split('\n\n').some(group=>group.split('\n').includes('User-agent: '+agent)&&group.split('\n').includes('Allow: /')),agent+' can crawl public pages');
  }
  assert.doesNotMatch(robots,/^Disallow:\s*\S/m);

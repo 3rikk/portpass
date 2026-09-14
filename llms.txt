@@ -1,0 +1,13 @@
+# Portpass
+
+> Portpass is a free, private multi-passport travel and residence map that evaluates passports, citizenships, residence permits and visas together.
+
+Portpass separates short-visit access from residence and settlement routes. Its travel wallet stays in local browser storage: Portpass does not receive document details, uploaded scans or personal profiles. Results are reference guidance based on the site's current rules and data, not a live border-admission decision; important decisions should be checked with the linked official authority.
+
+## Core pages
+
+- [Portpass app](https://portpass.world/): Build a private travel wallet and explore visit or residence options on an interactive world map.
+- [Passport mobility guides](https://portpass.world/passport/): Browse static visit and residence guides by passport or citizenship.
+- [Compound-document example](https://portpass.world/travel/india/germany-residence-permit/albania/): See how a German residence permit changes the Albania result for an Indian passport holder.
+- [Sitemap](https://portpass.world/sitemap.xml): Complete index of public Portpass reference pages.
+- [Source code and methodology](https://github.com/3rikk/portpass): Review the open-source rules, data provenance, coverage limits and tests.
