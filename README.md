@@ -156,6 +156,13 @@ Cloudflare zone's AI crawler blocking, managed robots.txt and WAF/challenge rule
 if crawlers cannot reach public pages; these dashboard settings can override the
 site policy. Keep unrelated security protections enabled.
 
+After a CLI deployment, `npm run submit:indexnow` sends the public sitemap URLs
+to the IndexNow endpoint. Ownership is verified by the public key file at the
+site root. The submission script rejects empty, oversized or off-domain URL
+sets; it never submits local wallet state or user-generated URLs. Run
+`node scripts/submit-indexnow.js --dry-run` to validate the payload without
+contacting IndexNow.
+
 Install the local Cloudflare CLI and authenticate once:
 
 ```sh
