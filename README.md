@@ -144,8 +144,9 @@ Cloudflare asset upload through `.assetsignore`.
 The build post-processor also applies the shared theme script/styles, Google-compatible favicon markup and the hostname-aware Alpha indexing guard to generated/static HTML. Browser favicons retain the SVG icon while a square 96×96 PNG is declared for search-engine compatibility. Keep `/favicon.png` in the Cloudflare asset allowlist.
 
 The generated crawler policy allows normal search engines and AI crawlers through
-`User-agent: *`, with explicit allowances for `OAI-SearchBot` and `GPTBot`, and
-advertises `https://portpass.world/sitemap.xml`. Wallets and imported profiles stay
+`User-agent: *`, with explicit allowances for `OAI-SearchBot`, `GPTBot`,
+`PerplexityBot`, `Perplexity-User`, `Claude-SearchBot`, `Claude-User` and
+`ClaudeBot`, and advertises `https://portpass.world/sitemap.xml`. Wallets and imported profiles stay
 in the browser; only public reference guides enter the sitemap. Do not publish
 personal wallet results as indexable pages. If server-hosted personal results are
 introduced, exclude them from the sitemap and serve `noindex` (robots.txt alone
