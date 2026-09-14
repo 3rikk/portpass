@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="icon.svg" alt="portpass.world icon" width="72" height="72">
+  <img src="assets/portpass-logo-liquid-glass.png" alt="portpass.world liquid-glass icon" width="72" height="72">
 
   <h1>portpass.world</h1>
 
