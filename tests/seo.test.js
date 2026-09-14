@@ -52,6 +52,9 @@ try {
   const html=fs.readFileSync(path.join(root,url,'index.html'),'utf8');
   assert.ok(html.includes('<link rel="canonical" href="'+SEO.CONFIG.baseUrl+url+'">'));
   assert.match(html,/<meta name="robots" content="index,follow">/);
+  assert.match(html,/<meta property="og:image" content="https:\/\/portpass\.world\/assets\/portpass-banner\.png">/);
+  assert.match(html,/<meta name="twitter:card" content="summary_large_image">/);
+  assert.match(html,/<script type="application\/ld\+json">/);
  }
 
  console.log('SEO generation passed: engine-backed overview, distinct visit/live, BOT filtering, compound permit route, filtering and sitemap.');
