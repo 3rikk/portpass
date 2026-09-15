@@ -10,4 +10,4 @@ Portpass separates short-visit access from residence and settlement routes. Its 
 - [Passport mobility guides](https://portpass.world/passport/): Browse static visit and residence guides by passport or citizenship.
 - [Compound-document example](https://portpass.world/travel/india/germany-residence-permit/albania/): See how a German residence permit changes the Albania result for an Indian passport holder.
 - [Sitemap](https://portpass.world/sitemap.xml): Complete index of public Portpass reference pages.
-- [Source code and methodology](https://github.com/3rikk/portpass): Review the open-source rules, data provenance, coverage limits and tests.
+- [Source code and methodology](https://github.com/erikkunz/portpass): Review the open-source rules, data provenance, coverage limits and tests.
